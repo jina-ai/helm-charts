@@ -1,6 +1,4 @@
-# Helm Charts
-
-This is where I keep my helm charts!
+# Jina Helm Chart Repository
 
 Currently, the available charts are:
 
@@ -10,8 +8,12 @@ Currently, the available charts are:
 
 Assuming you have [Helm](https://helm.sh/) installed,
 
+## Use a chart
+
+1. **use clip-as-service helm chart**
+
 ```sh
-helm repo add jina https://numb3r3.github.io/helm-charts/
+helm repo add jina https://jina.ai/helm-charts/
 helm upgrade --cleanup-on-fail --install \
   -n jina-clip-on-k8s \
   --create-namespace my-clip-on-k8s \

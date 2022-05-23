@@ -1,18 +1,18 @@
-# clip-on-k8s
+# Helm chart for Clip-as-Service
 
 A Helm chart for Clip-as-Service (https://clip-as-service.jina.ai/)
 
-**Homepage:** <https://github.com/numb3r3/charts>
+**Homepage:** <https://github.com/jina-ai/helm-charts/tree/main/charts/clip-on-k8s>
 
 ## Maintainers
 
-| Name   | Email | Url                    |
-|--------| ------ |------------------------|
-| Felix  |  | <https://github.com/numb3r3> |
+| Name   | Email               | Url                    |
+|--------|---------------------|------------------------|
+| Felix  | felix.wang@jina.ai  | <https://github.com/numb3r3> |
 
 ## Source Code
 
-* <https://github.com/numb3r3/clip-on-k8s>
+* <https://github.com/jina-ai/helm-charts>
 * <https://github.com/jina-ai/clip-as-service>
 
 ## Values

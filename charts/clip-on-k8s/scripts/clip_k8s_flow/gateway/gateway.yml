@@ -1,0 +1,116 @@
+apiVersion: v1
+data:
+  JINA_LOG_LEVEL: INFO
+  pythonunbuffered: '1'
+  worker_class: uvicorn.workers.UvicornH11Worker
+kind: ConfigMap
+metadata:
+  name: gateway-configmap
+  namespace: jina-clip-as-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: gateway
+  name: gateway
+  namespace: jina-clip-as-service
+spec:
+  ports:
+  - name: port
+    port: 51000
+    protocol: TCP
+    targetPort: 51000
+  - name: monitoring
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app: gateway
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: jina-clip-as-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: gateway
+        jina_deployment_name: gateway
+        ns: jina-clip-as-service
+        pod_type: GATEWAY
+        shard_id: ''
+    spec:
+      containers:
+      - args:
+        - gateway
+        - --k8s-namespace
+        - jina-clip-as-service
+        - --polling
+        - ANY
+        - --port
+        - '51000'
+        - --expose-endpoints
+        - '{}'
+        - --protocol
+        - HTTP
+        - --graph-description
+        - '{"clip_encoder": ["end-gateway"], "start-gateway": ["clip_encoder"]}'
+        - --deployments-addresses
+        - '{"clip_encoder": ["grpc://clip-encoder.jina-clip-as-service.svc:8080"]}'
+        - --pod-role
+        - GATEWAY
+        - --monitoring
+        command:
+        - jina
+        env:
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: JINA_DEPLOYMENT_NAME
+          value: gateway
+        envFrom:
+        - configMapRef:
+            name: gateway-configmap
+        image: jinaai/jina:3.4.3-py38-standard
+        imagePullPolicy: IfNotPresent
+        name: executor
+        ports:
+        - containerPort: 51000
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          tcpSocket:
+            port: 51000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: gateway
+  name: gateway
+  namespace: jina-clip-as-service
+spec:
+  endpoints:
+  - port: monitoring
+  namespaceSelector:
+    matchNames:
+    - jina-clip-as-service
+  selector:
+    matchLabels:
+      app: gateway

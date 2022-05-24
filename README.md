@@ -1,5 +1,9 @@
 # The Jina Helm Chart Repository
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Chart Publish](https://github.com/jina-ai/helm-charts/actions/workflows/publish.yml/badge.svg?branch=master)](https://github.com/jina-ai/helm-charts/actions/workflows/publish.yml)
+
+
 Jina-powered applications, ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
 
 Currently, the available charts are:

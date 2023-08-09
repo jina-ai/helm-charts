@@ -1,0 +1,38 @@
+apiVersion: v1
+entries:
+  cas-helm:
+  - apiVersion: v2
+    appVersion: 0.5.0
+    created: "2022-05-23T09:35:05.678374255Z"
+    description: A Helm chart for clip-as-service
+    digest: 6727060e94bb5fbc66811ac583fd48d4d5d1dbe9cfdb01171866532fde3603fb
+    name: cas-helm
+    sources:
+    - https://github.com/jina-ai/clip-as-service
+    type: application
+    urls:
+    - https://github.com/jina-ai/helm-charts/releases/download/cas-helm-0.1.0/cas-helm-0.1.0.tgz
+    version: 0.1.0
+  jcloud-operator:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2023-08-09T12:04:10.078618207+08:00"
+    description: The operator for jcloud flow management.
+    digest: 96482e6aa12ab541ff485f7a10b039a08ff4fd2f6ba33ec6a9ff032bcf5a144c
+    home: https://docs.jina.ai
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - email: deepankar.mahapatro@jina.ai
+      name: deepankarm
+    - email: zac.li@jina.ai
+      name: zac-li
+    - email: ran.tao@jina.ai
+      name: tarrantro
+    name: jcloud-operator
+    sources:
+    - https://github.com/jina-ai/jcloud-operator
+    type: application
+    urls:
+    - jcloud-operator-0.0.2.tgz
+    version: 0.0.2
+generated: "2023-08-09T12:04:10.078630229+08:00"

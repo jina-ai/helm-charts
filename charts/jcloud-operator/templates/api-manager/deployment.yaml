@@ -1,0 +1,113 @@
+{{- if .Values.apimanager.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "api-manager.fullname" . }}
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "api-manager.labels" . | nindent 4 }}
+{{- if .Values.apimanager.labels }}
+{{ toYaml .Values.apimanager.labels | indent 4 }}
+{{- end }}
+{{- with .Values.apimanager.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if and (not .Values.apimanager.autoscaling.enabled) (.Values.apimanager.replicas) }}
+  replicas: {{ .Values.apimanager.replicas }}
+{{- end }}
+  revisionHistoryLimit: {{ .Values.apimanager.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "api-manager.selectorLabels" . | nindent 6 }}
+  {{- with .Values.apimanager.deploymentStrategy }}
+  strategy:
+  {{ toYaml . | trim | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "api-manager.selectorLabels" . | nindent 8 }}
+  {{- with .Values.apimanager.podLabels }}
+  {{ toYaml . | indent 10 }}
+  {{- end }}
+      annotations:
+  {{- with .Values.apimanager.podAnnotations }}
+  {{ toYaml . | indent 10 }}
+  {{- end }}
+    spec:
+      containers:
+      - name: jcloud-api-manager
+        ports:
+        - containerPort: 3000
+          name: api
+          protocol: TCP
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        {{- if .Values.clusterid }}
+        - name: JCLOUD_CLUSTER_ID
+          value: {{ .Values.clusterid |quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.apimanager.extraEnv }}
+        - name: {{ $key }}
+          value: {{ $value }}
+        {{- end }}
+        {{- if .Values.apimanager.image.sha }}
+        image: "{{ .Values.apimanager.image.repository }}:{{ .Values.apimanager.image.tag }}@sha256:{{ .Values.apimanager.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.apimanager.image.repository }}:{{ .Values.apimanager.image.tag }}"
+        {{- end }}
+        imagePullPolicy: {{ .Values.apimanager.image.pullPolicy }}
+        {{- with .Values.apimanager.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.apimanager.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.apimanager.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.apimanager.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - mountPath: /etc/jcloud/credentials
+          name: jcloud-secret
+          readOnly: true
+        {{- if .Values.apimanager.existingConfigmap }}
+        - mountPath: /etc/jcloud/api
+          name: api-config
+          readOnly: true
+        {{- end }}
+      volumes:
+      {{- if .Values.apimanager.existingConfigmap }}
+      - name: api-config
+        configMap:
+          name: {{ .Values.apimanager.existingConfigmap }}
+      {{- end }}
+      - name: jcloud-secret
+        secret:
+          secretName: {{ template "api-manager.fullname" . }}-secret
+      serviceAccountName: {{ template "jina-operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      {{- if .Values.apimanager.image.pullSecrets }}
+      imagePullSecrets:
+      {{- $root := . }}
+      {{- range .Values.apimanager.image.pullSecrets }}
+        - name: {{ tpl . $root }}
+      {{- end}}
+      {{- end }}
+      {{- with .Values.apimanager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

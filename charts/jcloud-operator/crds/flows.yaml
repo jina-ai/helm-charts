@@ -1,0 +1,761 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.0
+  creationTimestamp: null
+  name: flows.jcloud.jina.ai
+spec:
+  group: jcloud.jina.ai
+  names:
+    kind: Flow
+    listKind: FlowList
+    plural: flows
+    singular: flow
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .status.protocol
+      name: Protocol
+      type: string
+    - jsonPath: .status.version
+      name: Version
+      type: string
+    - jsonPath: .status.endpoints
+      name: Endpoints
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Flow is the Schema for the flows API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FlowSpec defines the desired state of Flow
+            properties:
+              executors:
+                description: List of Executors to be deployed
+                items:
+                  properties:
+                    args:
+                      x-kubernetes-preserve-unknown-fields: true
+                    env_from_secret:
+                      additionalProperties:
+                        properties:
+                          key:
+                            type: string
+                          name:
+                            type: string
+                        type: object
+                      description: Env from Secret
+                      type: object
+                    jcloud:
+                      description: Executor level JCloud args
+                      properties:
+                        autoscale:
+                          description: Autoscale specification
+                          nullable: true
+                          properties:
+                            max:
+                              default: "2"
+                              description: Maximum number of replicas
+                              type: string
+                            metric:
+                              default: concurrency
+                              description: Metric evaluated for autoscaling
+                              type: string
+                            min:
+                              default: "1"
+                              description: Minimum number of replicas (0 means serverless)
+                              type: string
+                            revision_timeout:
+                              default: 300
+                              description: The revision window defines the global
+                                knative configuration revision timeout
+                              format: int64
+                              type: integer
+                            scale_down_delay:
+                              default: 30s
+                              description: The scale-down-delay defines the delay
+                                for scaling down replicas
+                              type: string
+                            stable_window:
+                              default: 60
+                              description: The stable window defines the sliding time
+                                window
+                              format: int64
+                              type: integer
+                            target:
+                              default: "100"
+                              description: Target number for concurrency/rps after
+                                which replicas autoscale
+                              type: string
+                            timeout:
+                              description: Timeout overrides stable_timeout and revision_timeout
+                                if greater
+                              format: int64
+                              type: integer
+                          type: object
+                        custom_dns:
+                          description: A list of allowed custom DNS for the Ingress,
+                            used in non-multiproto scenario
+                          items:
+                            type: string
+                          type: array
+                        custom_dns_grpc:
+                          description: A list of allowed custom DNS for the Ingress
+                            (GRPC protocol), used in multiproto scenario when the
+                            protocol is GRPC
+                          items:
+                            type: string
+                          type: array
+                        custom_dns_http:
+                          description: A list of allowed custom DNS for the Ingress
+                            (HTTP protocol), used in multiproto scenario when the
+                            protocol is HTTP
+                          items:
+                            type: string
+                          type: array
+                        custom_dns_websocket:
+                          description: A list of allowed custom DNS for the Ingress
+                            (WebSocket protocol), used in multiproto scenario when
+                            the protocol is WebSocket
+                          items:
+                            type: string
+                          type: array
+                        expose:
+                          default: false
+                          description: 'Denotes if the Executor needs to be exposed
+                            (default: false)'
+                          type: boolean
+                        imagepullpolicy:
+                          default: ifnotpresent
+                          description: Define image pull policy
+                          enum:
+                          - ifnotpresent
+                          - always
+                          - never
+                          type: string
+                        ingress:
+                          description: Ingress type to be used for exposing the Gateway
+                            / Executor
+                          enum:
+                          - kong
+                          type: string
+                        labels:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        maxUnavailable:
+                          description: Denotes maxUnavailable of a PodDisruptionBudget
+                          minimum: 0
+                          type: integer
+                        metadata:
+                          description: Metadata for CommonJCloudArgs
+                          nullable: true
+                          properties:
+                            restartRequestCount:
+                              default: 0
+                              description: 'Executor Restart request count (default:
+                                0)'
+                              minimum: 0
+                              type: integer
+                          type: object
+                        minAvailable:
+                          description: Denotes minAvailable of a PodDisruptionBudget
+                          minimum: 0
+                          type: integer
+                        monitor:
+                          description: Monitor setup
+                          properties:
+                            metrics:
+                              description: Metrics Service Configuration
+                              properties:
+                                enable:
+                                  default: false
+                                  type: boolean
+                                host:
+                                  default: ""
+                                  description: Service Hostname
+                                  type: string
+                                port:
+                                  default: 0
+                                  description: Service Port
+                                  type: integer
+                              type: object
+                            serviceMonitor:
+                              default: true
+                              description: Whether to enable ServiceMonitor
+                              nullable: true
+                              type: boolean
+                            traces:
+                              description: Traces Service Configuration
+                              properties:
+                                enable:
+                                  default: false
+                                  type: boolean
+                                host:
+                                  default: ""
+                                  description: Service Hostname
+                                  type: string
+                                port:
+                                  default: 0
+                                  description: Service Port
+                                  type: integer
+                              type: object
+                          type: object
+                        network:
+                          description: Network settings for the Gateway / Executor
+                          properties:
+                            healthcheck:
+                              description: Denotes if the resource should disable
+                                healthchecks
+                              nullable: true
+                              type: boolean
+                            ingress:
+                              description: Ingress Configuration
+                              properties:
+                                annotations:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                class:
+                                  default: kong
+                                  description: Ingress Class
+                                  type: string
+                                labels:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                type:
+                                  description: Ingress Type
+                                  enum:
+                                  - kong
+                                  type: string
+                              type: object
+                          type: object
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          description: Selector for Gateway/Executor
+                          type: object
+                        resources:
+                          description: Resource specification for the Executor
+                          properties:
+                            capacity:
+                              default: on-demand
+                              description: Capacity for the Executor
+                              enum:
+                              - spot
+                              - on-demand
+                              type: string
+                            cpu:
+                              description: CPU required for the Executor
+                              type: string
+                            gpu:
+                              type: string
+                            instance:
+                              description: Instance for the Executor
+                              enum:
+                              - C1
+                              - C2
+                              - C3
+                              - C4
+                              - C5
+                              - C6
+                              - C7
+                              - G1
+                              - G2
+                              - G3
+                              type: string
+                            memory:
+                              description: RAM required for the Executor
+                              type: string
+                            nodeGroup:
+                              description: NodeGroup for the Executor
+                              type: string
+                            storage:
+                              description: Storage required for the Executor
+                              properties:
+                                kind:
+                                  default: ephemeral
+                                  description: Storage kind for the Executor (ephemeral,
+                                    ebs or efs)
+                                  enum:
+                                  - efs
+                                  - ebs
+                                  - ephemeral
+                                  type: string
+                                retain:
+                                  default: false
+                                  description: Retain PV flag for Executor
+                                  type: boolean
+                                size:
+                                  default: 5G
+                                  description: Disk size needed for the Executor
+                                  type: string
+                              type: object
+                          type: object
+                      type: object
+                    name:
+                      description: Executor Name
+                      type: string
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              gateway:
+                description: Custom Gateway if passed
+                properties:
+                  env_from_secret:
+                    additionalProperties:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      type: object
+                    description: Env from Secret
+                    type: object
+                  jcloud:
+                    description: Gateway JCloud args
+                    properties:
+                      autoscale:
+                        description: Autoscale specification
+                        nullable: true
+                        properties:
+                          max:
+                            default: "2"
+                            description: Maximum number of replicas
+                            type: string
+                          metric:
+                            default: concurrency
+                            description: Metric evaluated for autoscaling
+                            type: string
+                          min:
+                            default: "1"
+                            description: Minimum number of replicas (0 means serverless)
+                            type: string
+                          revision_timeout:
+                            default: 300
+                            description: The revision window defines the global knative
+                              configuration revision timeout
+                            format: int64
+                            type: integer
+                          scale_down_delay:
+                            default: 30s
+                            description: The scale-down-delay defines the delay for
+                              scaling down replicas
+                            type: string
+                          stable_window:
+                            default: 60
+                            description: The stable window defines the sliding time
+                              window
+                            format: int64
+                            type: integer
+                          target:
+                            default: "100"
+                            description: Target number for concurrency/rps after which
+                              replicas autoscale
+                            type: string
+                          timeout:
+                            description: Timeout overrides stable_timeout and revision_timeout
+                              if greater
+                            format: int64
+                            type: integer
+                        type: object
+                      custom_dns:
+                        description: A list of allowed custom DNS for the Ingress,
+                          used in non-multiproto scenario
+                        items:
+                          type: string
+                        type: array
+                      custom_dns_grpc:
+                        description: A list of allowed custom DNS for the Ingress
+                          (GRPC protocol), used in multiproto scenario when the protocol
+                          is GRPC
+                        items:
+                          type: string
+                        type: array
+                      custom_dns_http:
+                        description: A list of allowed custom DNS for the Ingress
+                          (HTTP protocol), used in multiproto scenario when the protocol
+                          is HTTP
+                        items:
+                          type: string
+                        type: array
+                      custom_dns_websocket:
+                        description: A list of allowed custom DNS for the Ingress
+                          (WebSocket protocol), used in multiproto scenario when the
+                          protocol is WebSocket
+                        items:
+                          type: string
+                        type: array
+                      expose:
+                        default: true
+                        description: 'Denotes if the Gateway needs to be exposed (default:
+                          true)'
+                        type: boolean
+                      imagepullpolicy:
+                        default: ifnotpresent
+                        description: Define image pull policy
+                        enum:
+                        - ifnotpresent
+                        - always
+                        - never
+                        type: string
+                      ingress:
+                        description: Ingress type to be used for exposing the Gateway
+                          / Executor
+                        enum:
+                        - kong
+                        type: string
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      metadata:
+                        description: Metadata for CommonJCloudArgs
+                        nullable: true
+                        properties:
+                          restartRequestCount:
+                            default: 0
+                            description: 'Executor Restart request count (default:
+                              0)'
+                            minimum: 0
+                            type: integer
+                        type: object
+                      monitor:
+                        description: Monitor setup
+                        properties:
+                          metrics:
+                            description: Metrics Service Configuration
+                            properties:
+                              enable:
+                                default: false
+                                type: boolean
+                              host:
+                                default: ""
+                                description: Service Hostname
+                                type: string
+                              port:
+                                default: 0
+                                description: Service Port
+                                type: integer
+                            type: object
+                          serviceMonitor:
+                            default: true
+                            description: Whether to enable ServiceMonitor
+                            nullable: true
+                            type: boolean
+                          traces:
+                            description: Traces Service Configuration
+                            properties:
+                              enable:
+                                default: false
+                                type: boolean
+                              host:
+                                default: ""
+                                description: Service Hostname
+                                type: string
+                              port:
+                                default: 0
+                                description: Service Port
+                                type: integer
+                            type: object
+                        type: object
+                      network:
+                        description: Network settings for the Gateway / Executor
+                        properties:
+                          healthcheck:
+                            description: Denotes if the resource should disable healthchecks
+                            nullable: true
+                            type: boolean
+                          ingress:
+                            description: Ingress Configuration
+                            properties:
+                              annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              class:
+                                default: kong
+                                description: Ingress Class
+                                type: string
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              type:
+                                description: Ingress Type
+                                enum:
+                                - kong
+                                type: string
+                            type: object
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: Selector for Gateway/Executor
+                        type: object
+                      resources:
+                        description: Resource specification for the Executor
+                        properties:
+                          capacity:
+                            default: on-demand
+                            description: Capacity for the Executor
+                            enum:
+                            - spot
+                            - on-demand
+                            type: string
+                          cpu:
+                            description: CPU required for the Executor
+                            type: string
+                          gpu:
+                            type: string
+                          instance:
+                            description: Instance for the Executor
+                            enum:
+                            - C1
+                            - C2
+                            - C3
+                            - C4
+                            - C5
+                            - C6
+                            - C7
+                            - G1
+                            - G2
+                            - G3
+                            type: string
+                          memory:
+                            description: RAM required for the Executor
+                            type: string
+                          nodeGroup:
+                            description: NodeGroup for the Executor
+                            type: string
+                          storage:
+                            description: Storage required for the Executor
+                            properties:
+                              kind:
+                                default: ephemeral
+                                description: Storage kind for the Executor (ephemeral,
+                                  ebs or efs)
+                                enum:
+                                - efs
+                                - ebs
+                                - ephemeral
+                                type: string
+                              retain:
+                                default: false
+                                description: Retain PV flag for Executor
+                                type: boolean
+                              size:
+                                default: 5G
+                                description: Disk size needed for the Executor
+                                type: string
+                            type: object
+                        type: object
+                      timeout:
+                        default: 600
+                        description: 'Gateway timeout (default: 600)'
+                        type: integer
+                    type: object
+                  port:
+                    description: Ports for Multiprotocol Custom Gateway
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  protocol:
+                    description: Protocols for Multiprotocol Custom Gateway
+                    items:
+                      type: string
+                    type: array
+                  replicas:
+                    description: Replicas
+                    format: int32
+                    type: integer
+                  timeout_ready:
+                    default: 600000
+                    description: 'Gateway timeout_ready (default: 600000)'
+                    type: integer
+                  uses:
+                    description: Uses for Custom Gateway
+                    type: string
+                  uses_with:
+                    description: UsesWith for Custom Gateway
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              jcloud:
+                description: Global level JCloud args
+                properties:
+                  docarray:
+                    default: ""
+                    description: Docarray version to be used for deployment
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  metadata:
+                    description: Metadata of the Flow, for JCloud internal usage.
+                    nullable: true
+                    properties:
+                      state:
+                        default: Serving
+                        description: 'Denotes if the flow shoule be Serviing or Paused
+                          (default: "Serving")'
+                        enum:
+                        - Serving
+                        - Paused
+                        type: string
+                    type: object
+                  monitor:
+                    description: Monitor setup
+                    properties:
+                      metrics:
+                        description: Metrics Service Configuration
+                        properties:
+                          enable:
+                            default: false
+                            type: boolean
+                          host:
+                            default: ""
+                            description: Service Hostname
+                            type: string
+                          port:
+                            default: 0
+                            description: Service Port
+                            type: integer
+                        type: object
+                      serviceMonitor:
+                        default: true
+                        description: Whether to enable ServiceMonitor
+                        nullable: true
+                        type: boolean
+                      traces:
+                        description: Traces Service Configuration
+                        properties:
+                          enable:
+                            default: false
+                            type: boolean
+                          host:
+                            default: ""
+                            description: Service Hostname
+                            type: string
+                          port:
+                            default: 0
+                            description: Service Port
+                            type: integer
+                        type: object
+                    type: object
+                  name:
+                    description: Name of the Flow. This arg enables users to pass
+                      `Name` with the Flow YAML. This is always the same as `metadata.Name`
+                      in the K8S YAML. If a different name is passed, it'd get replaced
+                      by the `metadata.Name`. Not needed to be used for cases where
+                      operator is used without jcloud-api.
+                    type: string
+                  namespace:
+                    description: Namespace of the Flow. This arg enables users to
+                      pass `Namespace` with the Flow YAML. This is always the same
+                      as `metadata.Namespace` in the K8S YAML. If a different name
+                      is passed, it'd get replaced by the `metadata.Namespace`. Not
+                      needed to be used for cases where operator is used without jcloud-api.
+                    type: string
+                  retention_days:
+                    default: 0
+                    description: Number of days after which idle Flows are removed
+                    type: integer
+                  version:
+                    default: ""
+                    description: Jina version to be used for deployment
+                    type: string
+                type: object
+              jtype:
+                default: Flow
+                description: JType of the Flow. Always takes the value "Flow"
+                type: string
+              with:
+                description: With argument of the Flow
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - jtype
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+          status:
+            description: FlowStatus defines the observed state of Flow
+            properties:
+              conditions:
+                description: Current service state of Flow.
+                items:
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: Status of the condition. Can be True, False, Unknown.
+                      type: string
+                    type:
+                      description: Status of the Flow at different points in time.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              dashboards:
+                additionalProperties:
+                  type: string
+                description: Different dashboards to allow monitoring / tracing a
+                  Flow
+                type: object
+              endpoints:
+                additionalProperties:
+                  type: string
+                description: Endpoints that are exposed by the Ingress, so jina.Client
+                  can connect to it
+                type: object
+              phase:
+                description: Top level argument to denote the aggregated state of
+                  the Flow
+                type: string
+              protocol:
+                description: Gateway/Executor protocol with which Flow is deployed
+                type: string
+              version:
+                description: Jina version with which Flow is deployed
+                type: string
+            required:
+            - conditions
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

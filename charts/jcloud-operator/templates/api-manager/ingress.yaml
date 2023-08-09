@@ -1,0 +1,78 @@
+{{- if and .Values.apimanager.enable .Values.apimanager.ingress.enabled -}}
+{{- $ingressApiIsStable := eq (include "jina-operator.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "jina-operator.ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "jina-operator.ingress.supportsPathType" .) "true" -}}
+{{- $fullName := printf "%s-api" (include "jina-operator.fullname" .) -}}
+{{- $servicePort := .Values.apimanager.service.port -}}
+{{- $ingressPath := .Values.apimanager.ingress.path -}}
+{{- $ingressPathType := .Values.apimanager.ingress.pathType -}}
+{{- $extraPaths := .Values.apimanager.ingress.extraPaths -}}
+apiVersion: {{ include "jina-operator.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-ingress
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "api-manager.labels" . | nindent 4 }}
+{{- if .Values.apimanager.ingress.labels }}
+{{ toYaml .Values.apimanager.ingress.labels | indent 4 }}
+{{- end }}
+  {{- if .Values.apimanager.ingress.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.apimanager.ingress.annotations }}
+    {{ $key }}: {{ tpl $value $ | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if and $ingressSupportsIngressClassName .Values.apimanager.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.apimanager.ingress.ingressClassName }}
+  {{- end -}}
+{{- if .Values.apimanager.ingress.tls }}
+  tls:
+{{ tpl (toYaml .Values.apimanager.ingress.tls) $ | indent 4 }}
+{{- end }}
+  rules:
+  {{- if .Values.apimanager.ingress.hosts  }}
+  {{- range .Values.apimanager.ingress.hosts }}
+    - host: {{ tpl . $ | lower}}
+      http:
+        paths:
+{{- if $extraPaths }}
+{{ toYaml $extraPaths | indent 10 }}
+{{- end }}
+          - path: {{ $ingressPath }}
+            {{- if $ingressSupportsPathType }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}
+            backend:
+              {{- if $ingressApiIsStable }}
+              service:
+                name: {{ $fullName }}-service
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $fullName }}-service
+              servicePort: {{ $servicePort }}
+              {{- end }}
+  {{- end }}
+  {{- else }}
+    - http:
+        paths:
+          - backend:
+              {{- if $ingressApiIsStable }}
+              service:
+                name: {{ $fullName }}-service
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $fullName }}-service
+              servicePort: {{ $servicePort }}
+              {{- end }}
+            {{- if $ingressPath }}
+            path: {{ $ingressPath }}
+            {{- end }}
+            {{- if $ingressSupportsPathType }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}
+  {{- end -}}
+{{- end }}

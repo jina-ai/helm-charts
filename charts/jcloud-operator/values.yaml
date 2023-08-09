@@ -34,9 +34,8 @@ apimanager:
     failureThreshold: 3
 
   image:
-    repository: "jinaai/jina-api-manager"
-    # Overrides the Grafana image tag whose default is the chart appVersion
-    tag: "latest"
+    repository: "jinaai/jcloud-api-manager"
+    tag: "v0.0.1"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -226,9 +225,8 @@ operator:
     failureThreshold: 3
 
   image:
-    repository: "jinaai/jina-operator"
-    # Overrides the Grafana image tag whose default is the chart appVersion
-    tag: "latest"
+    repository: "jinaai/jcloud-operator"
+    tag: "v0.0.1"
     sha: ""
     pullPolicy: IfNotPresent
 

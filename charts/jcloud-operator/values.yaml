@@ -225,7 +225,7 @@ operator:
     failureThreshold: 3
 
   image:
-    repository: "jinaai/jcloud-operator"
+    repository: "jinaai/jcloud-api-manager"
     tag: "v0.0.1"
     sha: ""
     pullPolicy: IfNotPresent

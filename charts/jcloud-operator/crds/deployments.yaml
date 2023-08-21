@@ -1,0 +1,381 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.0
+  creationTimestamp: null
+  name: deployments.jcloud.jina.ai
+spec:
+  group: jcloud.jina.ai
+  names:
+    kind: Deployment
+    listKind: DeploymentList
+    plural: deployments
+    singular: deployment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .status.protocol
+      name: Protocol
+      type: string
+    - jsonPath: .status.version
+      name: Version
+      type: string
+    - jsonPath: .status.endpoints
+      name: Endpoints
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Deployment is the Schema for the deployments API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DeploymentSpec defines the desired state of Deployment
+            properties:
+              jcloud:
+                description: JCloud args
+                properties:
+                  autoscale:
+                    description: Autoscale specification
+                    nullable: true
+                    properties:
+                      max:
+                        default: 2
+                        description: Maximum number of replicas
+                        format: int32
+                        type: integer
+                      metric:
+                        default: concurrency
+                        description: Metric evaluated for autoscaling
+                        type: string
+                      min:
+                        default: 0
+                        description: Minimum number of replicas (0 means serverless)
+                        format: int32
+                        type: integer
+                      revision_timeout:
+                        default: 300
+                        description: The revision window defines the global knative
+                          configuration revision timeout
+                        format: int64
+                        type: integer
+                      scale_down_delay:
+                        default: 30s
+                        description: The scale-down-delay defines the delay for scaling
+                          down replicas
+                        type: string
+                      stable_window:
+                        default: 60
+                        description: The stable window defines the sliding time window
+                        format: int64
+                        type: integer
+                      target:
+                        default: "100"
+                        description: Target number for concurrency/rps after which
+                          replicas autoscale
+                        type: string
+                      timeout:
+                        description: Timeout overrides stable_timeout and revision_timeout
+                          if greater
+                        format: int64
+                        type: integer
+                    type: object
+                  custom_dns:
+                    description: A list of allowed custom DNS for the Ingress, used
+                      in non-multiproto scenario
+                    items:
+                      type: string
+                    type: array
+                  custom_dns_grpc:
+                    description: A list of allowed custom DNS for the Ingress (GRPC
+                      protocol), used in multiproto scenario when the protocol is
+                      GRPC
+                    items:
+                      type: string
+                    type: array
+                  custom_dns_http:
+                    description: A list of allowed custom DNS for the Ingress (HTTP
+                      protocol), used in multiproto scenario when the protocol is
+                      HTTP
+                    items:
+                      type: string
+                    type: array
+                  docarray:
+                    default: ""
+                    description: Docarray version to be used for deployment
+                    type: string
+                  imagepullpolicy:
+                    default: ifnotpresent
+                    description: Define image pull policy
+                    enum:
+                    - ifnotpresent
+                    - always
+                    - never
+                    type: string
+                  ingress:
+                    description: Ingress type to be used for exposing the Gateway
+                      / Executor
+                    enum:
+                    - kong
+                    - alb
+                    - nginx
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  maxUnavailable:
+                    description: Denotes maxUnavailable of a PodDisruptionBudget
+                    minimum: 0
+                    type: integer
+                  metadata:
+                    properties:
+                      restartRequestCount:
+                        default: 0
+                        description: 'Executor Restart request count (default: 0)'
+                        minimum: 0
+                        type: integer
+                      state:
+                        default: Serving
+                        description: 'Denotes if the Jina Deployment should be Serving
+                          or Paused (default: "Serving")'
+                        enum:
+                        - Serving
+                        - Paused
+                        type: string
+                    type: object
+                  minAvailable:
+                    description: Denotes minAvailable of a PodDisruptionBudget
+                    minimum: 0
+                    type: integer
+                  monitor:
+                    description: Monitor setup
+                    properties:
+                      metrics:
+                        description: Metrics Service Configuration
+                        properties:
+                          enable:
+                            default: false
+                            type: boolean
+                          host:
+                            default: ""
+                            description: Service Hostname
+                            type: string
+                          port:
+                            default: 0
+                            description: Service Port
+                            type: integer
+                        type: object
+                      serviceMonitor:
+                        default: true
+                        description: Whether to enable ServiceMonitor
+                        nullable: true
+                        type: boolean
+                      traces:
+                        description: Traces Service Configuration
+                        properties:
+                          enable:
+                            default: false
+                            type: boolean
+                          host:
+                            default: ""
+                            description: Service Hostname
+                            type: string
+                          port:
+                            default: 0
+                            description: Service Port
+                            type: integer
+                        type: object
+                    type: object
+                  network:
+                    description: Network settings for the Gateway / Executor
+                    properties:
+                      healthcheck:
+                        description: Denotes if the resource should disable healthchecks
+                        nullable: true
+                        type: boolean
+                      ingress:
+                        description: Ingress Configuration
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          class:
+                            description: Ingress Class
+                            type: string
+                          labels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type:
+                            description: Ingress Type
+                            enum:
+                            - kong
+                            - alb
+                            - nginx
+                            type: string
+                        type: object
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: Selector for Deployment
+                    type: object
+                  resources:
+                    description: Resource specification for the Executor
+                    properties:
+                      capacity:
+                        default: on-demand
+                        description: Capacity for the Executor
+                        enum:
+                        - spot
+                        - on-demand
+                        type: string
+                      cpu:
+                        description: CPU required for the Executor
+                        type: string
+                      gpu:
+                        type: string
+                      instance:
+                        description: Instance for the Executor
+                        enum:
+                        - C1
+                        - C2
+                        - C3
+                        - C4
+                        - C5
+                        - C6
+                        - C7
+                        - G1
+                        - G2
+                        - G3
+                        type: string
+                      memory:
+                        description: RAM required for the Executor
+                        type: string
+                      nodeGroup:
+                        description: NodeGroup for the Executor
+                        type: string
+                      storage:
+                        description: Storage required for the Executor
+                        properties:
+                          kind:
+                            default: ephemeral
+                            description: Storage kind for the Executor (ephemeral,
+                              ebs or efs)
+                            enum:
+                            - ebs
+                            - efs
+                            - ephemeral
+                            type: string
+                          retain:
+                            default: false
+                            description: Retain PV flag for Executor
+                            type: boolean
+                          size:
+                            default: 5G
+                            description: Disk size needed for the Executor
+                            type: string
+                          volumeName:
+                            default: ""
+                            description: volumeName is the binding reference to the
+                              PersistentVolume backing this claim.
+                            type: string
+                        type: object
+                    type: object
+                  version:
+                    default: ""
+                    description: Jina version to be used for deployment
+                    type: string
+                type: object
+              jtype:
+                default: Deployment
+                description: JType of the Deployment. Always takes the value "Deployment"
+                type: string
+              with:
+                description: With argument of the Deployment
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - jtype
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+          status:
+            description: DeploymentStatus defines the observed state of Deployment
+            properties:
+              conditions:
+                description: Current service state of Deployment.
+                items:
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: Status of the condition. Can be True, False, Unknown.
+                      type: string
+                    type:
+                      description: Status of the Deployment at different points in
+                        time.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              dashboards:
+                additionalProperties:
+                  type: string
+                description: Different dashboards to allow monitoring / tracing a
+                  Deployment
+                type: object
+              endpoints:
+                additionalProperties:
+                  type: string
+                description: Endpoints that are exposed by the Ingress, so jina.Client
+                  can connect to it
+                type: object
+              phase:
+                description: Top level argument to denote the aggregated state of
+                  the Deployment
+                type: string
+              protocol:
+                description: Gateway/Executor protocol with which Deployment is deployed
+                type: string
+              version:
+                description: Jina version with which Deployment is deployed
+                type: string
+            required:
+            - conditions
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,43 @@
+name: "(jc-operator) JCloud Helm Chart Release"
+
+on:
+  repository_dispatch:
+    types: ["helm-release"]
+
+jobs:
+  token-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('token are not equivalent!')
+        if: github.event.client_payload.release_token != env.release_token
+        env:
+          release_token: ${{ secrets.WOLF_RELEASE_TOKEN }}
+  release-helm-chart:
+    needs: token-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v3
+        with:
+          repository: jina-ai/${{ github.event.client_payload.repo }}
+          ref: refs/tags/${{ github.event.client_payload.tag }}
+          token: ${{ secrets.JINA_DEV_BOT }}
+          sparse-checkout: ${{ github.event.client_payload.chart_path }}
+      - name: Create helm release
+        id: create_helm_release
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE
+          mv ${{ github.event.client_payload.chart_path }} $GITHUB_WORKSPACE/charts/
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

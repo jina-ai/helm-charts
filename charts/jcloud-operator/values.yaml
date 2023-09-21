@@ -35,7 +35,7 @@ apimanager:
 
   image:
     repository: "jinaai/jcloud-api-manager"
-    tag: "v0.0.1"
+    tag: "v0.0.2"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -226,7 +226,7 @@ operator:
 
   image:
     repository: "jinaai/jcloud-api-manager"
-    tag: "v0.0.1"
+    tag: "v0.0.2"
     sha: ""
     pullPolicy: IfNotPresent
 

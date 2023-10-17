@@ -1,0 +1,19 @@
+apiVersion: v2
+name: embedding-api
+version: 0.0.1
+appVersion: 0.0.1
+kubeVersion: ">=1.25.0-0"
+description: Embedding API
+home: https://docs.jina.ai
+sources:
+  - https://github.com/jina-ai/jcloud-operator
+maintainers:
+  - name: tarrantro
+    email: ran.tao@jina.ai
+engine: gotpl
+type: application
+dependencies:
+  - name: redis
+    version: "18.1.5"
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: redis.enabled

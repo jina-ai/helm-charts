@@ -1,0 +1,5 @@
+image: {}
+autoscaling: {}
+serviceAccount: {}
+redis:
+  enabled: true

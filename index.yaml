@@ -35,6 +35,27 @@ entries:
     version: 0.0.1
   jcloud-operator:
   - apiVersion: v2
+    appVersion: 0.0.3
+    created: "2023-10-31T08:35:00.642362147Z"
+    description: The operator for jcloud flow management.
+    digest: 6f89ff3e844aab7ae927b305e753183ad5a60c40b79ffeccc408cbdbed813202
+    home: https://docs.jina.ai
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - email: deepankar.mahapatro@jina.ai
+      name: deepankarm
+    - email: zac.li@jina.ai
+      name: zac-li
+    - email: ran.tao@jina.ai
+      name: tarrantro
+    name: jcloud-operator
+    sources:
+    - https://github.com/jina-ai/jcloud-operator
+    type: application
+    urls:
+    - https://github.com/jina-ai/helm-charts/releases/download/jcloud-operator-0.0.3/jcloud-operator-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     appVersion: 0.0.1
     created: "2023-08-09T12:04:10.078618207+08:00"
     description: The operator for jcloud flow management.
@@ -55,4 +76,4 @@ entries:
     urls:
     - https://github.com/jina-ai/helm-charts/releases/download/jcloud-operator-0.0.2/jcloud-operator-0.0.2.tgz
     version: 0.0.2
-generated: "2023-10-31T03:13:28.953414745Z"
+generated: "2023-10-31T08:35:00.642371047Z"

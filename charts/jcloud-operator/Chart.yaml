@@ -1,7 +1,7 @@
 apiVersion: v2
 name: jcloud-operator
-version: 0.0.2
-appVersion: 0.0.1
+version: 0.0.3
+appVersion: 0.0.3
 kubeVersion: ">=1.21.0-0"
 description: The operator for jcloud flow management.
 home: https://docs.jina.ai
@@ -14,5 +14,4 @@ maintainers:
     email: zac.li@jina.ai
   - name: tarrantro
     email: ran.tao@jina.ai
-engine: gotpl
 type: application

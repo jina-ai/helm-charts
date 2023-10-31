@@ -1,0 +1,16 @@
+apiVersion: v2
+name: gateway-api-server
+version: 0.0.1
+appVersion: 0.0.20
+kubeVersion: ">=1.25.0-0"
+description: Gateway API Server.
+home: https://docs.jina.ai
+sources:
+  - https://github.com/jina-ai/gateway-api-server
+maintainers:
+  - name: Felix Wang
+    email: felix.wang@jina.ai
+  - name: Joan Fontanals Martinez
+    email: joan.fontanals.martinez@jina.ai
+engine: gotpl
+type: application

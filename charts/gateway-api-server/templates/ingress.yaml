@@ -1,0 +1,34 @@
+{{- if .Values.ingress.enabled -}}
+{{- $ingressApiIsStable := eq (include "gateway-api-server.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "gateway-api-server.ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "gateway-api-server.ingress.supportsPathType" .) "true" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "gateway-api-server.fullname" . }}-ingress
+  namespace: {{ template "gateway-api-server.namespace" . }}
+  labels:
+    {{- include "gateway-api-server.labels" . | nindent 4 }}
+  {{- if .Values.ingress.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ tpl $value $ | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  rules:
+    - host: api.jina.ai
+      http:
+        paths:
+        {{- if .Values.ingress.extraPaths }}
+        {{ toYaml .Values.ingress.extraPaths | indent 10 }}
+        {{- end }}
+          - path: {{ .Values.ingress.path }}
+            pathType: {{ .Values.ingress.pathType }}
+            backend:
+              service:
+                  name: {{ template "gateway-api-server.fullname" . }}-service
+                  port:
+                    number: {{ .Values.service.port }}
+{{- end }}

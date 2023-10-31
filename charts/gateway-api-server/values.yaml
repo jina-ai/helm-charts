@@ -1,0 +1,46 @@
+config: {}
+
+replicas: 1
+
+service:
+  port: 8000
+  monitorPort: 8081
+
+ingress:
+  {}
+  # enabled: true
+  # ingressClassName: nginx
+  # path: "/"
+  # pathType: Prefix
+  # annotations:
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  #   nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+  #   nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+
+image:
+  repository: jinaai/api-gateway-server
+  tag: v0.0.20
+  iamgePullPolicy: Always
+
+containerPort: 8000
+
+livenessProbe:
+  httpGet:
+    port: 8000
+    path: /
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    port: 8000
+    path: /
+  initialDelaySeconds: 15
+
+resources:
+  requests: {}
+  limits: {}
+
+serviceAccount:
+  create: false

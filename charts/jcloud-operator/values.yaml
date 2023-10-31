@@ -1,5 +1,4 @@
 commonLabels: {}
-clusterid: test123
 
 apimanager:
   enable: true
@@ -35,7 +34,7 @@ apimanager:
 
   image:
     repository: "jinaai/jcloud-api-manager"
-    tag: "v0.0.2"
+    tag: "v0.0.3"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -137,23 +136,22 @@ apimanager:
     appProtocol: ""
 
   ingress:
-    enabled: true
+    enabled: false
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
     # ingressClassName: nginx
     # Values can be templated
-    annotations:
-      kubernetes.io/ingress.class: kong
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+    # annotations:
+    #   kubernetes.io/ingress.class: kong
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
     labels: {}
     path: /
 
     # pathType is only for k8s >= 1.1=
     pathType: Prefix
 
-    hosts:
-      - test123.wolf.jina.ai
+    hosts: []
     ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
     extraPaths: []
     # - path: /*
@@ -169,15 +167,18 @@ apimanager:
     #       port:
     #         name: use-annotation
 
-    tls:
-      - secretName: wolf-tls
-        hosts:
-          - "*.wolf.jina.ai"
+    # tls:
+    #   - secretName: wolf-tls
+    #     hosts:
+    #       - "*.wolf.jina.ai"
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
 
 operator:
+  customResources:
+    flow: true
+    deployment: false
   rbac:
     create: true
     serviceAccount:
@@ -225,8 +226,8 @@ operator:
     failureThreshold: 3
 
   image:
-    repository: "jinaai/jcloud-api-manager"
-    tag: "v0.0.2"
+    repository: "jinaai/jcloud-operator"
+    tag: "v0.0.3"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -325,8 +326,7 @@ operator:
     appProtocol: ""
 
   serviceMonitor:
-    ## If true, a ServiceMonitor CRD is created for a prometheus operator
-    ## https://github.com/coreos/prometheus-operator
+    ## If true, a ServiceMonitor CRD is created for a jcloud operator
     ##
     enabled: false
     path: /metrics
@@ -342,10 +342,9 @@ operator:
     logLevel: 0
 
   config:
-    create: true
-    mongo:
-      url: ""
-    operator: {}
+    create: false
+
+  trustCA: {}
 
   rbacProxy:
     enabled: true

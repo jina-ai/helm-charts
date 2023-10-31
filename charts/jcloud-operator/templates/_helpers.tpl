@@ -24,6 +24,32 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
+{{- define "jina-operator.flow-operator-name" -}}
+{{- if .Values.flowOperatorNameOverride -}}
+{{- .Values.flowOperatorNameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "flow-%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "flow-%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "jina-operator.deployment-operator-name" -}}
+{{- if .Values.deploymentOperatorNameOverride -}}
+{{- .Values.deploymentOperatorNameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "deployment-%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "deployment-%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
@@ -101,6 +127,20 @@ operator Selector labels
 */}}
 {{- define "jina-operator.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "jina-operator.name" . }}
+{{- end -}}
+
+{{/*
+flow operator Selector labels
+*/}}
+{{- define "jina-operator.flowOperatorSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "jina-operator.flow-operator-name" . }}
+{{- end -}}
+
+{{/*
+deployment operator Selector labels
+*/}}
+{{- define "jina-operator.deploymentOperatorSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "jina-operator.deployment-operator-name" . }}
 {{- end -}}
 
 {{/*

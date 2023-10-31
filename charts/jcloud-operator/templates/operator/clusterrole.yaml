@@ -14,6 +14,7 @@ rules:
     - jcloud.jina.ai
   resources:
     - flows
+    - deployments
   verbs:
     - create
     - delete
@@ -27,12 +28,14 @@ rules:
     - jcloud.jina.ai
   resources:
     - flows/finalizers
+    - deployments/finalizers
   verbs:
     - update
 - apiGroups:
     - jcloud.jina.ai
   resources:
     - flows/status
+    - deployments/status
   verbs:
     - get
     - patch

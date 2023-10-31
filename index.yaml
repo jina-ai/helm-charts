@@ -13,6 +13,26 @@ entries:
     urls:
     - https://github.com/jina-ai/helm-charts/releases/download/cas-helm-0.1.0/cas-helm-0.1.0.tgz
     version: 0.1.0
+  gateway-api-server:
+  - apiVersion: v2
+    appVersion: 0.0.20
+    created: "2023-10-31T03:13:28.952890417Z"
+    description: Gateway API Server.
+    digest: 571b75a63c6c9c776cefd33ab2025e295b655b53a9a067adc869e136d2b638ea
+    home: https://docs.jina.ai
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: felix.wang@jina.ai
+      name: Felix Wang
+    - email: joan.fontanals.martinez@jina.ai
+      name: Joan Fontanals Martinez
+    name: gateway-api-server
+    sources:
+    - https://github.com/jina-ai/gateway-api-server
+    type: application
+    urls:
+    - https://github.com/jina-ai/helm-charts/releases/download/gateway-api-server-0.0.1/gateway-api-server-0.0.1.tgz
+    version: 0.0.1
   jcloud-operator:
   - apiVersion: v2
     appVersion: 0.0.1
@@ -35,4 +55,4 @@ entries:
     urls:
     - https://github.com/jina-ai/helm-charts/releases/download/jcloud-operator-0.0.2/jcloud-operator-0.0.2.tgz
     version: 0.0.2
-generated: "2023-08-09T12:04:10.078630229+08:00"
+generated: "2023-10-31T03:13:28.953414745Z"

@@ -342,7 +342,7 @@ operator:
     logLevel: 0
 
   config:
-    create: false
+    create: true
 
   trustCA: {}
 

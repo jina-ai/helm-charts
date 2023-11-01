@@ -103,9 +103,11 @@ spec:
         - mountPath: /etc/jcloud/configure
           name: jcloud-operator-config
           readOnly: true
+        {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
         - mountPath: /etc/jcloud/credentials
           name: jcloud-secret
           readOnly: true
+        {{- end }}
         {{- if .Values.operator.trustCA }}
         {{- range $key, $value := .Values.operator.trustCA }}
         - mountPath: /etc/ssl/certs/{{ $key }}
@@ -130,9 +132,11 @@ spec:
       - name: jcloud-operator-config
         configMap:
           name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
       - name: jcloud-secret
         secret:
           secretName: {{ template "jina-operator.fullname" . }}-secret
+      {{- end }}
       {{- if .Values.operator.trustCA }}
       - name: trustca
         secret:
@@ -252,9 +256,11 @@ spec:
         - mountPath: /etc/jcloud/configure
           name: jcloud-operator-config
           readOnly: true
+        {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
         - mountPath: /etc/jcloud/credentials
           name: jcloud-secret
           readOnly: true
+        {{- end }}
         {{- if .Values.operator.trustCA }}
         {{- range $key, $value := .Values.operator.trustCA }}
         - mountPath: /etc/ssl/certs/{{ $key }}
@@ -279,9 +285,11 @@ spec:
       - name: jcloud-operator-config
         configMap:
           name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
       - name: jcloud-secret
         secret:
           secretName: {{ template "jina-operator.fullname" . }}-secret
+      {{- end }}
       {{- if .Values.operator.trustCA }}
       - name: trustca
         secret:

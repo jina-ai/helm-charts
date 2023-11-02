@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
 {{- if .Values.operator.secretSync.enabled }}
-      - name: secretSync
+      - name: secret-sync
         envFrom:
         - secretRef:
             name: {{ template "jina-operator.fullname" . }}-secret-sync

@@ -80,11 +80,9 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         volumeMounts:
-        {{- if and .Values.apimanager.enable .Values.operator.config.create }}
         - mountPath: /etc/jcloud/credentials
           name: jcloud-secret
           readOnly: true
-        {{- end }}
         {{- if .Values.apimanager.existingConfigmap }}
         - mountPath: /etc/jcloud/api
           name: api-config
@@ -96,11 +94,9 @@ spec:
         configMap:
           name: {{ .Values.apimanager.existingConfigmap }}
       {{- end }}
-      {{- if and .Values.apimanager.enable .Values.operator.config.create }}
       - name: jcloud-secret
         secret:
           secretName: {{ template "api-manager.fullname" . }}-secret
-      {{- end }}
       serviceAccountName: {{ template "jina-operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       {{- if .Values.apimanager.image.pullSecrets }}

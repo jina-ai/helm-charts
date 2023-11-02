@@ -39,11 +39,15 @@ spec:
     spec:
       containers:
 {{- if .Values.operator.secretSync.enabled }}
-      - name: secretSync
+      - name: secret-sync
         envFrom:
         - secretRef:
             name: {{ template "jina-operator.fullname" . }}-secret-sync
-        image: {{ .Values.operator.secretSync.image }}
+        {{- if .Values.operator.secretSync.image.sha }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}@sha256:{{ .Values.operator.secretSync.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}"
+        {{- end }}
         {{- if .Values.operator.secretSync.resources }}
         resources: {{- toYaml .Values.operator.secretSync.resources | nindent 10 }}
         {{- end }}
@@ -113,9 +117,11 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         volumeMounts:
+        {{- if and .Values.operator.config.create }}
         - mountPath: /etc/jcloud/configure
           name: jcloud-operator-config
           readOnly: true
+        {{- end }}
         {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
         - mountPath: /etc/jcloud/credentials
           name: jcloud-secret
@@ -142,9 +148,11 @@ spec:
       {{- end}}
       {{- end }}
       volumes:
+      {{- if and .Values.operator.config.create }}
       - name: jcloud-operator-config
         configMap:
           name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- end }}
       {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
       - name: jcloud-secret
         secret:
@@ -266,9 +274,11 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         volumeMounts:
+        {{- if and .Values.operator.config.create }}
         - mountPath: /etc/jcloud/configure
           name: jcloud-operator-config
           readOnly: true
+        {{- end }}
         {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
         - mountPath: /etc/jcloud/credentials
           name: jcloud-secret
@@ -295,9 +305,11 @@ spec:
       {{- end}}
       {{- end }}
       volumes:
+      {{- if and .Values.operator.config.create }}
       - name: jcloud-operator-config
         configMap:
           name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- end }}
       {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
       - name: jcloud-secret
         secret:

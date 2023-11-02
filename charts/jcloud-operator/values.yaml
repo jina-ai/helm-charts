@@ -2,7 +2,7 @@ commonLabels: {}
 clusterid: test123
 
 apimanager:
-  enable: true
+  enable: false
   # TODO, have HPA.
   autoscaling:
     enable: false
@@ -343,13 +343,18 @@ operator:
     logLevel: 0
 
   config:
-    create: false
+    create: true
 
   trustCA: {}
 
   secretSync:
     enabled: false
     config: {}
+    image:
+      repository: "jinaai/ecr-cred-sync"
+      tag: "99dcfb7-dirty__linux_amd64"
+      sha: ""
+      pullPolicy: IfNotPresent
 
   rbacProxy:
     enabled: true

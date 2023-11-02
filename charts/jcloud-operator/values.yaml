@@ -1,4 +1,5 @@
 commonLabels: {}
+clusterid: test123
 
 apimanager:
   enable: true
@@ -342,9 +343,13 @@ operator:
     logLevel: 0
 
   config:
-    create: true
+    create: false
 
   trustCA: {}
+
+  secretSync:
+    enabled: false
+    config: {}
 
   rbacProxy:
     enabled: true

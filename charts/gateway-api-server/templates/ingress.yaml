@@ -1,14 +1,14 @@
 {{- if .Values.ingress.enabled -}}
-{{- $ingressApiIsStable := eq (include "gateway-api-server.ingress.isStable" .) "true" -}}
-{{- $ingressSupportsIngressClassName := eq (include "gateway-api-server.ingress.supportsIngressClassName" .) "true" -}}
-{{- $ingressSupportsPathType := eq (include "gateway-api-server.ingress.supportsPathType" .) "true" -}}
+{{- $ingressApiIsStable := eq (include "gateway.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "gateway.ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "gateway.ingress.supportsPathType" .) "true" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ template "gateway-api-server.fullname" . }}-ingress
-  namespace: {{ template "gateway-api-server.namespace" . }}
+  name: {{ template "gateway.fullname" . }}-ingress
+  namespace: {{ template "gateway.namespace" . }}
   labels:
-    {{- include "gateway-api-server.labels" . | nindent 4 }}
+    {{- include "gateway.labels" . | nindent 4 }}
   {{- if .Values.ingress.annotations }}
   annotations:
     {{- range $key, $value := .Values.ingress.annotations }}
@@ -18,7 +18,7 @@ metadata:
 spec:
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
-    - host: api.jina.ai
+    - host: {{ .Values.ingress.hostName }}
       http:
         paths:
         {{- if .Values.ingress.extraPaths }}
@@ -28,7 +28,7 @@ spec:
             pathType: {{ .Values.ingress.pathType }}
             backend:
               service:
-                  name: {{ template "gateway-api-server.fullname" . }}-service
-                  port:
-                    number: {{ .Values.service.port }}
+                name: {{ template "gateway.fullname" . }}-service
+                port:
+                  number: {{ .Values.service.port }}
 {{- end }}

@@ -1,17 +1,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "gateway-api-server.fullname" . }}-servicemonitor
-  namespace: {{ template "gateway-api-server.namespace" . }}
+  name: {{ template "gateway.fullname" . }}-servicemonitor
+  namespace: {{ template "gateway.namespace" . }}
   labels:
-    {{- include "gateway-api-server.labels" . | nindent 4 }}
+    {{- include "gateway.labels" . | nindent 4 }}
     release: jina-prom
 spec:
   endpoints:
     - port: monitoring
   namespaceSelector:
     matchNames:
-      - {{ template "gateway-api-server.namespace" . }}
+      - {{ template "gateway.namespace" . }}
   selector:
     matchLabels:
-      {{- include "gateway-api-server.selectorLabels" . | nindent 6 }}
+      {{- include "gateway.selectorLabels" . | nindent 6 }}

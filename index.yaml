@@ -97,4 +97,23 @@ entries:
     urls:
     - https://github.com/jina-ai/helm-charts/releases/download/jcloud-operator-0.0.2/jcloud-operator-0.0.2.tgz
     version: 0.0.2
-generated: "2023-11-02T08:59:33.768626392Z"
+  universal-api-gateway:
+  - apiVersion: v2
+    appVersion: 0.0.20
+    created: "2023-11-22T10:12:04.230711522Z"
+    description: Gateway API Server.
+    digest: 9a7a1a859b11177244237730663a2d83d7ea3baf0f52dd5e05a472a88184111d
+    home: https://docs.jina.ai
+    maintainers:
+    - email: felix.wang@jina.ai
+      name: Felix Wang
+    - email: joan.fontanals.martinez@jina.ai
+      name: Joan Fontanals Martinez
+    name: universal-api-gateway
+    sources:
+    - https://github.com/jina-ai/gateway-api-server
+    type: application
+    urls:
+    - https://github.com/jina-ai/helm-charts/releases/download/universal-api-gateway-0.0.4/universal-api-gateway-0.0.4.tgz
+    version: 0.0.4
+generated: "2023-11-22T10:12:04.230767678Z"

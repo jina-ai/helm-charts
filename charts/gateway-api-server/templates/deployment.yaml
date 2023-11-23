@@ -37,7 +37,11 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: status.podIP
-          {{- if not .Values.serviceMonitor }}
+          {{- range $key, $value := .Values.extraEnv }}
+          - name: {{ $key | upper }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- if not .Values.serviceMonitor.enabled }}
           - name: MONITORING
             value: "false"
           {{- end }}
@@ -53,7 +57,7 @@ spec:
               name: {{ template "gateway-api-server.fullname" . }}-secret
           ports:
             - containerPort: {{ .Values.containerPort }}
-              name: {{ template "gateway-api-server.fullname" . }}-port
+              name: service-port
           {{- with .Values.livenessProbe }}
           livenessProbe:
           {{- toYaml . | nindent 12 }}
@@ -70,4 +74,11 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- $root := . }}
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ tpl . $root }}
+      {{- end}}
+      {{- end }}
       serviceAccountName: {{ template "gateway-api-server.serviceAccountName" . }}

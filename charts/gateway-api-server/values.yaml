@@ -19,8 +19,11 @@ ingress:
 
 image:
   repository: jinaai/api-gateway-server
-  tag: v0.0.20
+  tag: v0.0.32
   iamgePullPolicy: Always
+
+  # pullSecrets: 
+  #   - myRegistrKeySecretName
 
 containerPort: 8000
 
@@ -44,3 +47,6 @@ resources:
 
 serviceAccount:
   create: false
+
+serviceMonitor:
+  enabled: true

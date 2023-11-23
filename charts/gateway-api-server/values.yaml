@@ -17,8 +17,11 @@ ingress:
      nginx.ingress.kubernetes.io/limit-rps: "100"
 image:
   repository: jinaai/api-gateway-server
-  tag: latest
+  tag: v0.0.32
   pullPolicy: Always
+
+  # pullSecrets: 
+  #   - myRegistrKeySecretName
 
 containerPort: 8000
 
@@ -46,5 +49,7 @@ resources:
 serviceAccount:
   create: false
 
+serviceMonitor:
+  enabled: true
 
 extraEnv: {}

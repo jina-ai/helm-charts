@@ -1,8 +1,8 @@
 apiVersion: v2
-name: universal-api-gateway
-version: 0.0.4
-appVersion: 0.0.20
-#kubeVersion: ">=1.25.0-0"
+name: gateway-api-server
+version: 0.0.5
+appVersion: 0.0.32
+kubeVersion: ">=1.25.0-0"
 description: Gateway API Server.
 home: https://docs.jina.ai
 sources:

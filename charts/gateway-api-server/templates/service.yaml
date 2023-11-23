@@ -10,7 +10,7 @@ spec:
     {{- include "gateway.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort:  {{ .Values.service.port }}
+      targetPort:  {{ .Values.containerPort }}
       name: fastapi
     - port: {{ .Values.service.monitorPort }}
       targetPort: {{ .Values.service.monitorPort }}

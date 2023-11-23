@@ -51,8 +51,12 @@ spec:
           - name: {{ $key | upper }}
             value: {{ $value | quote }}
           {{- end }}
+          {{- if not .Values.serviceMonitor.enabled }}
+          - name: MONITORING
+            value: "false"
+          {{- end }}
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - containerPort: {{ .Values.containerPort }}
               name: fastapi
             - containerPort: {{ .Values.service.monitorPort }}
               name: monitoring
@@ -72,4 +76,11 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- $root := . }}
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ tpl . $root }}
+      {{- end}}
+      {{- end }}
       serviceAccountName: {{ template "gateway.serviceAccountName" . }}

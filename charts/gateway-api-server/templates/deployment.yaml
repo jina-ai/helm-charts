@@ -31,20 +31,6 @@ spec:
     spec:
       containers:
         - name: gateway
-          env:
-          - name: POD_IP
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: status.podIP
-          {{- range $key, $value := .Values.extraEnv }}
-          - name: {{ $key | upper }}
-            value: {{ $value | quote }}
-          {{- end }}
-          {{- if not .Values.serviceMonitor.enabled }}
-          - name: MONITORING
-            value: "false"
-          {{- end }}
           {{- if .Values.image.sha }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}@sha256:{{ .Values.image.sha }}"
           {{- else }}
@@ -64,6 +50,10 @@ spec:
           {{- range $key, $value := .Values.extraEnv }}
           - name: {{ $key | upper }}
             value: {{ $value | quote }}
+          {{- end }}
+          {{- if not .Values.serviceMonitor.enabled }}
+          - name: MONITORING
+            value: "false"
           {{- end }}
           ports:
             - containerPort: {{ .Values.containerPort }}

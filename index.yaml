@@ -15,6 +15,25 @@ entries:
     version: 0.1.0
   gateway-api-server:
   - apiVersion: v2
+    appVersion: 0.0.32
+    created: "2023-11-23T11:39:25.881399132Z"
+    description: Gateway API Server.
+    digest: 519ee62093cf4f8f46257476791ad2b40981b86e27b030cb613c9e39eec31ef1
+    home: https://docs.jina.ai
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: felix.wang@jina.ai
+      name: Felix Wang
+    - email: joan.fontanals.martinez@jina.ai
+      name: Joan Fontanals Martinez
+    name: gateway-api-server
+    sources:
+    - https://github.com/jina-ai/gateway-api-server
+    type: application
+    urls:
+    - https://github.com/jina-ai/helm-charts/releases/download/gateway-api-server-0.0.5/gateway-api-server-0.0.5.tgz
+    version: 0.0.5
+  - apiVersion: v2
     appVersion: 0.0.20
     created: "2023-10-31T03:13:28.952890417Z"
     description: Gateway API Server.
@@ -116,4 +135,4 @@ entries:
     urls:
     - https://github.com/jina-ai/helm-charts/releases/download/universal-api-gateway-0.0.4/universal-api-gateway-0.0.4.tgz
     version: 0.0.4
-generated: "2023-11-22T10:12:04.230767678Z"
+generated: "2023-11-23T11:39:25.881416404Z"

@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "gateway-api-server.name" -}}
+{{- define "gateway.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end }}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "gateway-api-server.fullname" -}}
+{{- define "gateway.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "gateway-api-server.chart" -}}
+{{- define "gateway.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create the name of the jina operator service account
 */}}
-{{- define "gateway-api-server.serviceAccountName" -}}
+{{- define "gateway.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "gateway-api-server.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "gateway.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
@@ -45,7 +45,7 @@ Create the name of the jina operator service account
 {{/*
 Allow the release namespace to be overridden for multi-namespace deployments in combined charts
 */}}
-{{- define "gateway-api-server.namespace" -}}
+{{- define "gateway.namespace" -}}
   {{- if .Values.namespaceOverride -}}
     {{- .Values.namespaceOverride -}}
   {{- else -}}
@@ -57,11 +57,11 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
 generic labels
 */}}
 {{- define "generic.labels" -}}
-helm.sh/chart: {{ include "gateway-api-server.chart" . }}
+helm.sh/chart: {{ include "gateway.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/part-of: {{ include "gateway-api-server.name" . }}
+app.kubernetes.io/part-of: {{ include "gateway.name" . }}
 {{- if .Values.commonLabels }}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
@@ -70,8 +70,8 @@ app.kubernetes.io/part-of: {{ include "gateway-api-server.name" . }}
 {{/*
 operator labels
 */}}
-{{- define "gateway-api-server.labels" -}}
-{{ include "gateway-api-server.selectorLabels" . }}
+{{- define "gateway.labels" -}}
+{{ include "gateway.selectorLabels" . }}
 {{ include "generic.labels" . }}
 {{- if .Values.extraLabels }}
 {{ toYaml .Values.extraLabels }}
@@ -81,14 +81,14 @@ operator labels
 {{/*
 operator Selector labels
 */}}
-{{- define "gateway-api-server.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "gateway-api-server.name" . }}
+{{- define "gateway.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "gateway.name" . }}
 {{- end -}}
 
 {{/*
 Return the appropriate apiVersion for rbac.
 */}}
-{{- define "gateway-api-server.rbac.apiVersion" -}}
+{{- define "gateway.rbac.apiVersion" -}}
   {{- if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1" }}
     {{- print "rbac.authorization.k8s.io/v1" -}}
   {{- else -}}
@@ -99,7 +99,7 @@ Return the appropriate apiVersion for rbac.
 {{/*
 Return the appropriate apiVersion for ingress.
 */}}
-{{- define "gateway-api-server.ingress.apiVersion" -}}
+{{- define "gateway.ingress.apiVersion" -}}
   {{- if and (.Capabilities.APIVersions.Has "networking.k8s.io/v1") (semverCompare ">= 1.19-0" .Capabilities.KubeVersion.Version) -}}
       {{- print "networking.k8s.io/v1" -}}
   {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
@@ -112,7 +112,7 @@ Return the appropriate apiVersion for ingress.
 {{/*
 Return the appropriate apiVersion for podDisruptionBudget.
 */}}
-{{- define "gateway-api-server.podDisruptionBudget.apiVersion" -}}
+{{- define "gateway.podDisruptionBudget.apiVersion" -}}
   {{- if $.Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget" -}}
     {{- print "policy/v1" -}}
   {{- else -}}
@@ -123,20 +123,20 @@ Return the appropriate apiVersion for podDisruptionBudget.
 {{/*
 Return if ingress is stable.
 */}}
-{{- define "gateway-api-server.ingress.isStable" -}}
-  {{- eq (include "gateway-api-server.ingress.apiVersion" .) "networking.k8s.io/v1" -}}
+{{- define "gateway.ingress.isStable" -}}
+  {{- eq (include "gateway.ingress.apiVersion" .) "networking.k8s.io/v1" -}}
 {{- end -}}
 
 {{/*
 Return if ingress supports ingressClassName.
 */}}
-{{- define "gateway-api-server.ingress.supportsIngressClassName" -}}
-  {{- or (eq (include "gateway-api-server.ingress.isStable" .) "true") (and (eq (include "gateway-api-server.ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18-0" .Capabilities.KubeVersion.Version)) -}}
+{{- define "gateway.ingress.supportsIngressClassName" -}}
+  {{- or (eq (include "gateway.ingress.isStable" .) "true") (and (eq (include "gateway.ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18-0" .Capabilities.KubeVersion.Version)) -}}
 {{- end -}}
 
 {{/*
 Return if ingress supports pathType.
 */}}
-{{- define "gateway-api-server.ingress.supportsPathType" -}}
-  {{- or (eq (include "gateway-api-server.ingress.isStable" .) "true") (and (eq (include "gateway-api-server.ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18-0" .Capabilities.KubeVersion.Version)) -}}
+{{- define "gateway.ingress.supportsPathType" -}}
+  {{- or (eq (include "gateway.ingress.isStable" .) "true") (and (eq (include "gateway.ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18-0" .Capabilities.KubeVersion.Version)) -}}
 {{- end -}}

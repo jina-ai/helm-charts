@@ -7,25 +7,26 @@ service:
   monitorPort: 8081
 
 ingress:
-  {}
-  # enabled: true
-  # ingressClassName: nginx
-  # path: "/"
-  # pathType: Prefix
-  # annotations:
-  #   nginx.ingress.kubernetes.io/proxy-body-size: "0"
-  #   nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-  #   nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-
+   enabled: true
+   ingressClassName: nginx
+   path: "/"
+   pathType: Prefix
+   annotations:
+     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+     nginx.ingress.kubernetes.io/limit-rps: "100"
 image:
   repository: jinaai/api-gateway-server
   tag: v0.0.32
-  iamgePullPolicy: Always
+  pullPolicy: Always
 
   # pullSecrets: 
   #   - myRegistrKeySecretName
 
 containerPort: 8000
+
+podAnnotations:
+  linkerd.io/inject: enabled
 
 livenessProbe:
   httpGet:
@@ -50,3 +51,5 @@ serviceAccount:
 
 serviceMonitor:
   enabled: true
+
+extraEnv: {}

@@ -37,6 +37,10 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: status.podIP
+          {{- if not .Values.serviceMonitor }}
+          - name: MONITORING
+            value: "false"
+          {{- end }}
           {{- if .Values.image.sha }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}@sha256:{{ .Values.image.sha }}"
           {{- else }}

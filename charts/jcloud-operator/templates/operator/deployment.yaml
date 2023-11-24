@@ -211,6 +211,23 @@ spec:
         {{- end }}
     spec:
       containers:
+{{- if .Values.operator.secretSync.enabled }}
+      - name: secret-sync
+        envFrom:
+        - secretRef:
+            name: {{ template "jina-operator.fullname" . }}-secret-sync
+        {{- if .Values.operator.secretSync.image.sha }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}@sha256:{{ .Values.operator.secretSync.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}"
+        {{- end }}
+        {{- if .Values.operator.secretSync.resources }}
+        resources: {{- toYaml .Values.operator.secretSync.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.operator.secretSync.securityContext }}
+        securityContext: {{- toYaml .Values.operator.secretSync.securityContext | nindent 10 }}
+        {{- end }}
+{{- end }}
 {{- if .Values.operator.rbacProxy.enabled }}
       - name: rbac-proxy
         args:

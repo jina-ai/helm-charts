@@ -352,7 +352,7 @@ operator:
     config: {}
     image:
       repository: "jinaai/ecr-cred-sync"
-      tag: "99dcfb7-dirty__linux_amd64"
+      tag: "d570aac-dirty__linux_amd64"
       sha: ""
       pullPolicy: IfNotPresent
 

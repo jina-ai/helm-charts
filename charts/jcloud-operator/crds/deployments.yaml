@@ -13,494 +13,531 @@ spec:
     listKind: DeploymentList
     plural: deployments
     shortNames:
-    - jd
+      - jd
     singular: deployment
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.phase
-      name: Phase
-      type: string
-    - jsonPath: .status.protocol
-      name: Protocol
-      type: string
-    - jsonPath: .status.version
-      name: Version
-      type: string
-    - jsonPath: .status.endpoints
-      name: Endpoints
-      type: string
-    name: v1alpha1
-    schema:
-      openAPIV3Schema:
-        description: Deployment is the Schema for the deployments API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: DeploymentSpec defines the desired state of Deployment
-            properties:
-              jcloud:
-                description: JCloud args
-                properties:
-                  autoscale:
-                    description: Autoscale specification
-                    nullable: true
-                    properties:
-                      max:
-                        default: 2
-                        description: Maximum number of replicas
-                        format: int32
-                        type: integer
-                      metric:
-                        default: concurrency
-                        description: Metric evaluated for autoscaling
-                        type: string
-                      min:
-                        default: 0
-                        description: Minimum number of replicas (0 means serverless)
-                        format: int32
-                        type: integer
-                      revision_timeout:
-                        default: 300
-                        description: The revision window defines the global knative
-                          configuration revision timeout
-                        format: int64
-                        type: integer
-                      scale_down_delay:
-                        default: 30s
-                        description: The scale-down-delay defines the delay for scaling
-                          down replicas
-                        type: string
-                      stable_window:
-                        default: 60
-                        description: The stable window defines the sliding time window
-                        format: int64
-                        type: integer
-                      target:
-                        default: "100"
-                        description: Target number for concurrency/rps after which
-                          replicas autoscale
-                        type: string
-                      timeout:
-                        description: Timeout overrides stable_timeout and revision_timeout
-                          if greater
-                        format: int64
-                        type: integer
-                    type: object
-                  custom_dns:
-                    description: A list of allowed custom DNS for the Ingress, used
-                      in non-multiproto scenario
-                    items:
-                      type: string
-                    type: array
-                  custom_dns_grpc:
-                    description: A list of allowed custom DNS for the Ingress (GRPC
-                      protocol), used in multiproto scenario when the protocol is
-                      GRPC
-                    items:
-                      type: string
-                    type: array
-                  custom_dns_http:
-                    description: A list of allowed custom DNS for the Ingress (HTTP
-                      protocol), used in multiproto scenario when the protocol is
-                      HTTP
-                    items:
-                      type: string
-                    type: array
-                  docarray:
-                    default: ""
-                    description: Docarray version to be used for deployment
-                    type: string
-                  imagepullpolicy:
-                    default: ifnotpresent
-                    description: Define image pull policy
-                    enum:
-                    - ifnotpresent
-                    - always
-                    - never
-                    type: string
-                  ingress:
-                    default: kong
-                    description: Ingress type to be used for exposing the Executor
-                    enum:
-                    - kong
-                    - alb
-                    - nginx
-                    type: string
-                  labels:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  maxUnavailable:
-                    description: Denotes maxUnavailable of a PodDisruptionBudget
-                    minimum: 0
-                    type: integer
-                  metadata:
-                    description: Metadata for DeploymentJCloudArgs
-                    nullable: true
-                    properties:
-                      restartRequestCount:
-                        default: 0
-                        description: 'Executor Restart request count (default: 0)'
-                        minimum: 0
-                        type: integer
-                      state:
-                        default: Serving
-                        description: 'Denotes if the Jina Deployment should be Serving
-                          or Paused (default: "Serving")'
-                        enum:
-                        - Serving
-                        - Paused
-                        type: string
-                    type: object
-                  minAvailable:
-                    description: Denotes minAvailable of a PodDisruptionBudget
-                    minimum: 0
-                    type: integer
-                  monitor:
-                    description: Monitor setup
-                    properties:
-                      metrics:
-                        description: Metrics Service Configuration
-                        properties:
-                          enable:
-                            default: false
-                            type: boolean
-                          host:
-                            default: ""
-                            description: Service Hostname
-                            type: string
-                          port:
-                            default: 0
-                            description: Service Port
-                            type: integer
-                        type: object
-                      serviceMonitor:
-                        default: true
-                        description: Whether to enable ServiceMonitor
-                        nullable: true
-                        type: boolean
-                      traces:
-                        description: Traces Service Configuration
-                        properties:
-                          enable:
-                            default: false
-                            type: boolean
-                          host:
-                            default: ""
-                            description: Service Hostname
-                            type: string
-                          port:
-                            default: 0
-                            description: Service Port
-                            type: integer
-                        type: object
-                    type: object
-                  name:
-                    description: Name of the Flow. This arg enables users to pass
-                      `Name` with the Flow YAML. This is always the same as `metadata.Name`
-                      in the K8S YAML. If a different name is passed, it'd get replaced
-                      by the `metadata.Name`. Not needed to be used for cases where
-                      operator is used without jcloud-api.
-                    type: string
-                  namespace:
-                    description: Namespace of the Flow. This arg enables users to
-                      pass `Namespace` with the Flow YAML. This is always the same
-                      as `metadata.Namespace` in the K8S YAML. If a different name
-                      is passed, it'd get replaced by the `metadata.Namespace`. Not
-                      needed to be used for cases where operator is used without jcloud-api.
-                    type: string
-                  network:
-                    description: Network settings for the Executor
-                    properties:
-                      healthcheck:
-                        description: Denotes if the resource should disable healthchecks
-                        nullable: true
-                        type: boolean
-                      ingress:
-                        description: Ingress Configuration
-                        properties:
-                          annotations:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          class:
-                            description: Ingress Class
-                            type: string
-                          labels:
-                            additionalProperties:
-                              type: string
-                            type: object
-                          type:
-                            description: Ingress Type
-                            enum:
-                            - kong
-                            - alb
-                            - nginx
-                            type: string
-                        type: object
-                    type: object
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    description: Selector for Deployment
-                    type: object
-                  resources:
-                    description: Resource specification for the Executor
-                    properties:
-                      capacity:
-                        default: on-demand
-                        description: Capacity for the Executor
-                        enum:
-                        - spot
-                        - on-demand
-                        type: string
-                      cpu:
-                        description: CPU required for the Executor
-                        type: string
-                      gpu:
-                        type: string
-                      instance:
-                        description: Instance for the Executor
-                        enum:
-                        - C1
-                        - C2
-                        - C3
-                        - C4
-                        - C5
-                        - C6
-                        - C7
-                        - G1
-                        - G2
-                        - G3
-                        type: string
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                        type: object
-                      memory:
-                        description: RAM required for the Executor
-                        type: string
-                      nodeGroup:
-                        description: NodeGroup for the Executor
-                        type: string
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. Requests cannot exceed
-                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                        type: object
-                      storage:
-                        description: Storage required for the Executor
-                        properties:
-                          kind:
-                            default: ephemeral
-                            description: Storage kind for the Executor (ephemeral,
-                              ebs or efs)
-                            enum:
-                            - ebs
-                            - efs
-                            - ephemeral
-                            type: string
-                          retain:
-                            default: false
-                            description: Retain PV flag for Executor
-                            type: boolean
-                          size:
-                            default: 5G
-                            description: Disk size needed for the Executor
-                            type: string
-                          volumeName:
-                            default: ""
-                            description: volumeName is the binding reference to the
-                              PersistentVolume backing this claim.
-                            type: string
-                        type: object
-                    type: object
-                  tolerations:
-                    description: Tolerations for Gateway/Executor
-                    items:
-                      description: The pod this Toleration is attached to tolerates
-                        any taint that matches the triple <key,value,effect> using
-                        the matching operator <operator>.
+    - additionalPrinterColumns:
+        - jsonPath: .status.phase
+          name: Phase
+          type: string
+        - jsonPath: .status.protocol
+          name: Protocol
+          type: string
+        - jsonPath: .status.version
+          name: Version
+          type: string
+        - jsonPath: .status.endpoints
+          name: Endpoints
+          type: string
+      name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: Deployment is the Schema for the deployments API
+          properties:
+            apiVersion:
+              description:
+                "APIVersion defines the versioned schema of this representation
+                of an object. Servers should convert recognized schemas to the latest
+                internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
+              type: string
+            kind:
+              description:
+                "Kind is a string value representing the REST resource this
+                object represents. Servers may infer this from the endpoint the client
+                submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: DeploymentSpec defines the desired state of Deployment
+              properties:
+                jcloud:
+                  description: JCloud args
+                  properties:
+                    autoscale:
+                      description: Autoscale specification
+                      nullable: true
                       properties:
-                        effect:
-                          description: Effect indicates the taint effect to match.
-                            Empty means match all taint effects. When specified, allowed
-                            values are NoSchedule, PreferNoSchedule and NoExecute.
+                        max:
+                          default: 2
+                          description: Maximum number of replicas
+                          format: int32
+                          type: integer
+                        metric:
+                          default: concurrency
+                          description: Metric evaluated for autoscaling
                           type: string
-                        key:
-                          description: Key is the taint key that the toleration applies
-                            to. Empty means match all taint keys. If the key is empty,
-                            operator must be Exists; this combination means to match
-                            all values and all keys.
-                          type: string
-                        operator:
-                          description: Operator represents a key's relationship to
-                            the value. Valid operators are Exists and Equal. Defaults
-                            to Equal. Exists is equivalent to wildcard for value,
-                            so that a pod can tolerate all taints of a particular
-                            category.
-                          type: string
-                        tolerationSeconds:
-                          description: TolerationSeconds represents the period of
-                            time the toleration (which must be of effect NoExecute,
-                            otherwise this field is ignored) tolerates the taint.
-                            By default, it is not set, which means tolerate the taint
-                            forever (do not evict). Zero and negative values will
-                            be treated as 0 (evict immediately) by the system.
+                        min:
+                          default: 0
+                          description: Minimum number of replicas (0 means serverless)
+                          format: int32
+                          type: integer
+                        revision_timeout:
+                          default: 300
+                          description:
+                            The revision window defines the global knative
+                            configuration revision timeout
                           format: int64
                           type: integer
-                        value:
-                          description: Value is the taint value the toleration matches
-                            to. If the operator is Exists, the value should be empty,
-                            otherwise just a regular string.
+                        scale_down_delay:
+                          default: 30s
+                          description:
+                            The scale-down-delay defines the delay for scaling
+                            down replicas
                           type: string
+                        stable_window:
+                          default: 60
+                          description: The stable window defines the sliding time window
+                          format: int64
+                          type: integer
+                        target:
+                          default: "100"
+                          description:
+                            Target number for concurrency/rps after which
+                            replicas autoscale
+                          type: string
+                        timeout:
+                          description:
+                            Timeout overrides stable_timeout and revision_timeout
+                            if greater
+                          format: int64
+                          type: integer
                       type: object
-                    type: array
-                  version:
-                    default: ""
-                    description: Jina version to be used for deployment
-                    type: string
-                type: object
-              jtype:
-                default: Deployment
-                description: JType of the Deployment. Always takes the value "Deployment"
-                type: string
-              with:
-                description: With argument of the Deployment
-                x-kubernetes-preserve-unknown-fields: true
-            required:
-            - jtype
-            type: object
-            x-kubernetes-preserve-unknown-fields: true
-          status:
-            description: DeploymentStatus defines the observed state of Deployment
-            properties:
-              conditions:
-                description: Current service state of Deployment.
-                items:
-                  description: "Condition contains details for one aspect of the current
-                    state of this API Resource. --- This struct is intended for direct
-                    use as an array at the field path .status.conditions.  For example,
-                    \n type FooStatus struct{ // Represents the observations of a
-                    foo's current state. // Known .status.conditions.type are: \"Available\",
-                    \"Progressing\", and \"Degraded\" // +patchMergeKey=type // +patchStrategy=merge
-                    // +listType=map // +listMapKey=type Conditions []metav1.Condition
-                    `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\"
-                    protobuf:\"bytes,1,rep,name=conditions\"` \n // other fields }"
-                  properties:
-                    lastTransitionTime:
-                      description: lastTransitionTime is the last time the condition
-                        transitioned from one status to another. This should be when
-                        the underlying condition changed.  If that is not known, then
-                        using the time when the API field changed is acceptable.
-                      format: date-time
+                    custom_dns:
+                      description:
+                        A list of allowed custom DNS for the Ingress, used
+                        in non-multiproto scenario
+                      items:
+                        type: string
+                      type: array
+                    custom_dns_grpc:
+                      description:
+                        A list of allowed custom DNS for the Ingress (GRPC
+                        protocol), used in multiproto scenario when the protocol is
+                        GRPC
+                      items:
+                        type: string
+                      type: array
+                    custom_dns_http:
+                      description:
+                        A list of allowed custom DNS for the Ingress (HTTP
+                        protocol), used in multiproto scenario when the protocol is
+                        HTTP
+                      items:
+                        type: string
+                      type: array
+                    docarray:
+                      default: ""
+                      description: Docarray version to be used for deployment
                       type: string
-                    message:
-                      description: message is a human readable message indicating
-                        details about the transition. This may be an empty string.
-                      maxLength: 32768
+                    expose:
+                      default: true
+                      description:
+                        "Denotes if the Deployment needs to be exposed (default:
+                        true)"
+                      type: boolean
+                    imagepullpolicy:
+                      default: ifnotpresent
+                      description: Define image pull policy
+                      enum:
+                        - ifnotpresent
+                        - always
+                        - never
                       type: string
-                    observedGeneration:
-                      description: observedGeneration represents the .metadata.generation
-                        that the condition was set based upon. For instance, if .metadata.generation
-                        is currently 12, but the .status.conditions[x].observedGeneration
-                        is 9, the condition is out of date with respect to the current
-                        state of the instance.
-                      format: int64
+                    ingress:
+                      default: kong
+                      description: Ingress type to be used for exposing the Executor
+                      enum:
+                        - kong
+                        - alb
+                        - nginx
+                      type: string
+                    labels:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    maxUnavailable:
+                      description: Denotes maxUnavailable of a PodDisruptionBudget
                       minimum: 0
                       type: integer
-                    reason:
-                      description: reason contains a programmatic identifier indicating
-                        the reason for the condition's last transition. Producers
-                        of specific condition types may define expected values and
-                        meanings for this field, and whether the values are considered
-                        a guaranteed API. The value should be a CamelCase string.
-                        This field may not be empty.
-                      maxLength: 1024
-                      minLength: 1
-                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                    metadata:
+                      description: Metadata for DeploymentJCloudArgs
+                      nullable: true
+                      properties:
+                        restartRequestCount:
+                          default: 0
+                          description: "Executor Restart request count (default: 0)"
+                          minimum: 0
+                          type: integer
+                        state:
+                          default: Serving
+                          description:
+                            'Denotes if the Jina Deployment should be Serving
+                            or Paused (default: "Serving")'
+                          enum:
+                            - Serving
+                            - Paused
+                          type: string
+                      type: object
+                    minAvailable:
+                      description: Denotes minAvailable of a PodDisruptionBudget
+                      minimum: 0
+                      type: integer
+                    monitor:
+                      description: Monitor setup
+                      properties:
+                        metrics:
+                          description: Metrics Service Configuration
+                          properties:
+                            enable:
+                              default: false
+                              type: boolean
+                            host:
+                              default: ""
+                              description: Service Hostname
+                              type: string
+                            port:
+                              default: 0
+                              description: Service Port
+                              type: integer
+                          type: object
+                        serviceMonitor:
+                          default: true
+                          description: Whether to enable ServiceMonitor
+                          nullable: true
+                          type: boolean
+                        traces:
+                          description: Traces Service Configuration
+                          properties:
+                            enable:
+                              default: false
+                              type: boolean
+                            host:
+                              default: ""
+                              description: Service Hostname
+                              type: string
+                            port:
+                              default: 0
+                              description: Service Port
+                              type: integer
+                          type: object
+                      type: object
+                    name:
+                      description:
+                        Name of the Flow. This arg enables users to pass
+                        `Name` with the Flow YAML. This is always the same as `metadata.Name`
+                        in the K8S YAML. If a different name is passed, it'd get replaced
+                        by the `metadata.Name`. Not needed to be used for cases where
+                        operator is used without jcloud-api.
                       type: string
-                    status:
-                      description: status of the condition, one of True, False, Unknown.
-                      enum:
-                      - "True"
-                      - "False"
-                      - Unknown
+                    namespace:
+                      description:
+                        Namespace of the Flow. This arg enables users to
+                        pass `Namespace` with the Flow YAML. This is always the same
+                        as `metadata.Namespace` in the K8S YAML. If a different name
+                        is passed, it'd get replaced by the `metadata.Namespace`. Not
+                        needed to be used for cases where operator is used without jcloud-api.
                       type: string
-                    type:
-                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
-                        --- Many .condition.type values are consistent across resources
-                        like Available, but because arbitrary conditions can be useful
-                        (see .node.status.conditions), the ability to deconflict is
-                        important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
-                      maxLength: 316
-                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                    network:
+                      description: Network settings for the Executor
+                      properties:
+                        healthcheck:
+                          description: Denotes if the resource should disable healthchecks
+                          nullable: true
+                          type: boolean
+                        ingress:
+                          description: Ingress Configuration
+                          properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            class:
+                              description: Ingress Class
+                              type: string
+                            labels:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            type:
+                              description: Ingress Type
+                              enum:
+                                - kong
+                                - alb
+                                - nginx
+                              type: string
+                          type: object
+                      type: object
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      description: Selector for Deployment
+                      type: object
+                    resources:
+                      description: Resource specification for the Executor
+                      properties:
+                        capacity:
+                          default: on-demand
+                          description: Capacity for the Executor
+                          enum:
+                            - spot
+                            - on-demand
+                          type: string
+                        cpu:
+                          description: CPU required for the Executor
+                          type: string
+                        gpu:
+                          type: string
+                        instance:
+                          description: Instance for the Executor
+                          enum:
+                            - C1
+                            - C2
+                            - C3
+                            - C4
+                            - C5
+                            - C6
+                            - C7
+                            - G1
+                            - G2
+                            - G3
+                          type: string
+                        limits:
+                          additionalProperties:
+                            anyOf:
+                              - type: integer
+                              - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description:
+                            "Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                          type: object
+                        memory:
+                          description: RAM required for the Executor
+                          type: string
+                        nodeGroup:
+                          description: NodeGroup for the Executor
+                          type: string
+                        requests:
+                          additionalProperties:
+                            anyOf:
+                              - type: integer
+                              - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description:
+                            "Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified, otherwise
+                            to an implementation-defined value. Requests cannot exceed
+                            Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                          type: object
+                        storage:
+                          description: Storage required for the Executor
+                          properties:
+                            kind:
+                              default: ephemeral
+                              description:
+                                Storage kind for the Executor (ephemeral,
+                                ebs or efs)
+                              enum:
+                                - ebs
+                                - efs
+                                - ephemeral
+                              type: string
+                            retain:
+                              default: false
+                              description: Retain PV flag for Executor
+                              type: boolean
+                            size:
+                              default: 5G
+                              description: Disk size needed for the Executor
+                              type: string
+                            volumeName:
+                              default: ""
+                              description:
+                                volumeName is the binding reference to the
+                                PersistentVolume backing this claim.
+                              type: string
+                          type: object
+                      type: object
+                    tolerations:
+                      description: Tolerations for Gateway/Executor
+                      items:
+                        description:
+                          The pod this Toleration is attached to tolerates
+                          any taint that matches the triple <key,value,effect> using
+                          the matching operator <operator>.
+                        properties:
+                          effect:
+                            description:
+                              Effect indicates the taint effect to match.
+                              Empty means match all taint effects. When specified, allowed
+                              values are NoSchedule, PreferNoSchedule and NoExecute.
+                            type: string
+                          key:
+                            description:
+                              Key is the taint key that the toleration applies
+                              to. Empty means match all taint keys. If the key is empty,
+                              operator must be Exists; this combination means to match
+                              all values and all keys.
+                            type: string
+                          operator:
+                            description:
+                              Operator represents a key's relationship to
+                              the value. Valid operators are Exists and Equal. Defaults
+                              to Equal. Exists is equivalent to wildcard for value,
+                              so that a pod can tolerate all taints of a particular
+                              category.
+                            type: string
+                          tolerationSeconds:
+                            description:
+                              TolerationSeconds represents the period of
+                              time the toleration (which must be of effect NoExecute,
+                              otherwise this field is ignored) tolerates the taint.
+                              By default, it is not set, which means tolerate the taint
+                              forever (do not evict). Zero and negative values will
+                              be treated as 0 (evict immediately) by the system.
+                            format: int64
+                            type: integer
+                          value:
+                            description:
+                              Value is the taint value the toleration matches
+                              to. If the operator is Exists, the value should be empty,
+                              otherwise just a regular string.
+                            type: string
+                        type: object
+                      type: array
+                    version:
+                      default: ""
+                      description: Jina version to be used for deployment
                       type: string
-                  required:
-                  - lastTransitionTime
-                  - message
-                  - reason
-                  - status
-                  - type
                   type: object
-                type: array
-              dashboards:
-                additionalProperties:
+                jtype:
+                  default: Deployment
+                  description: JType of the Deployment. Always takes the value "Deployment"
                   type: string
-                description: Different dashboards to allow monitoring / tracing a
-                  Deployment
-                type: object
-              docarray:
-                description: Docarray version with which Deployment is deployed
-                type: string
-              endpoints:
-                additionalProperties:
+                with:
+                  description: With argument of the Deployment
+                  x-kubernetes-preserve-unknown-fields: true
+              required:
+                - jtype
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              description: DeploymentStatus defines the observed state of Deployment
+              properties:
+                conditions:
+                  description: Current service state of Deployment.
+                  items:
+                    description:
+                      "Condition contains details for one aspect of the current
+                      state of this API Resource. --- This struct is intended for direct
+                      use as an array at the field path .status.conditions.  For example,
+                      \n type FooStatus struct{ // Represents the observations of a
+                      foo's current state. // Known .status.conditions.type are: \"Available\",
+                      \"Progressing\", and \"Degraded\" // +patchMergeKey=type // +patchStrategy=merge
+                      // +listType=map // +listMapKey=type Conditions []metav1.Condition
+                      `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\"
+                      protobuf:\"bytes,1,rep,name=conditions\"` \n // other fields }"
+                    properties:
+                      lastTransitionTime:
+                        description:
+                          lastTransitionTime is the last time the condition
+                          transitioned from one status to another. This should be when
+                          the underlying condition changed.  If that is not known, then
+                          using the time when the API field changed is acceptable.
+                        format: date-time
+                        type: string
+                      message:
+                        description:
+                          message is a human readable message indicating
+                          details about the transition. This may be an empty string.
+                        maxLength: 32768
+                        type: string
+                      observedGeneration:
+                        description:
+                          observedGeneration represents the .metadata.generation
+                          that the condition was set based upon. For instance, if .metadata.generation
+                          is currently 12, but the .status.conditions[x].observedGeneration
+                          is 9, the condition is out of date with respect to the current
+                          state of the instance.
+                        format: int64
+                        minimum: 0
+                        type: integer
+                      reason:
+                        description:
+                          reason contains a programmatic identifier indicating
+                          the reason for the condition's last transition. Producers
+                          of specific condition types may define expected values and
+                          meanings for this field, and whether the values are considered
+                          a guaranteed API. The value should be a CamelCase string.
+                          This field may not be empty.
+                        maxLength: 1024
+                        minLength: 1
+                        pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                        type: string
+                      status:
+                        description: status of the condition, one of True, False, Unknown.
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                        type: string
+                      type:
+                        description:
+                          type of condition in CamelCase or in foo.example.com/CamelCase.
+                          --- Many .condition.type values are consistent across resources
+                          like Available, but because arbitrary conditions can be useful
+                          (see .node.status.conditions), the ability to deconflict is
+                          important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                        maxLength: 316
+                        pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                        type: string
+                    required:
+                      - lastTransitionTime
+                      - message
+                      - reason
+                      - status
+                      - type
+                    type: object
+                  type: array
+                dashboards:
+                  additionalProperties:
+                    type: string
+                  description:
+                    Different dashboards to allow monitoring / tracing a
+                    Deployment
+                  type: object
+                docarray:
+                  description: Docarray version with which Deployment is deployed
                   type: string
-                description: Endpoints that are exposed by the Ingress, so jina.Client
-                  can connect to it
-                type: object
-              phase:
-                description: Top level argument to denote the aggregated state of
-                  the Deployment
-                type: string
-              protocol:
-                description: Gateway/Executor protocol with which Deployment is deployed
-                type: string
-              version:
-                description: Jina version with which Deployment is deployed
-                type: string
-            required:
-            - conditions
-            - phase
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
+                endpoints:
+                  additionalProperties:
+                    type: string
+                  description:
+                    Endpoints that are exposed by the Ingress, so jina.Client
+                    can connect to it
+                  type: object
+                phase:
+                  description:
+                    Top level argument to denote the aggregated state of
+                    the Deployment
+                  type: string
+                protocol:
+                  description: Gateway/Executor protocol with which Deployment is deployed
+                  type: string
+                version:
+                  description: Jina version with which Deployment is deployed
+                  type: string
+              required:
+                - conditions
+                - phase
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}

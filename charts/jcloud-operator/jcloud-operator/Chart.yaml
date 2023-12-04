@@ -1,7 +1,7 @@
 apiVersion: v2
 name: jcloud-operator
 version: 0.0.6
-appVersion: 0.0.4
+appVersion: 0.0.5
 kubeVersion: ">=1.21.0-0"
 description: The operator for jcloud flow management.
 home: https://docs.jina.ai

@@ -1,0 +1,21 @@
+{{- if .Values.operator.rbac.create -}}
+apiVersion: {{ template "jina-operator.rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-leader-election-rolebinding
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "jina-operator.fullname" . }}-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "jina-operator.serviceAccountName" . }}
+  namespace: {{ template "jina-operator.namespace" . }}
+{{- end -}}

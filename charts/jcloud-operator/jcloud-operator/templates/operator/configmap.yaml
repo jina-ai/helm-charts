@@ -1,0 +1,16 @@
+{{- if .Values.operator.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-operator-config
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+data:
+  operator-cfg.yaml: |
+{{- toYaml .Values.operator.config.operator | nindent 4 }}
+{{- end }}

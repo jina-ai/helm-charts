@@ -1,0 +1,55 @@
+{{ if .Values.operator.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-metrics
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- if .Values.operator.service.labels }}
+{{ toYaml .Values.operator.service.labels | indent 4 }}
+{{- end }}
+{{- $root := . }}
+{{- with .Values.operator.service.annotations }}
+  annotations:
+{{ tpl (toYaml . | indent 4) $root }}
+{{- end }}
+spec:
+{{- if (or (eq .Values.operator.service.type "ClusterIP") (empty .Values.operator.service.type)) }}
+  type: ClusterIP
+  {{- if .Values.operator.service.clusterIP }}
+  clusterIP: {{ .Values.operator.service.clusterIP }}
+  {{end}}
+{{- else if eq .Values.operator.service.type "LoadBalancer" }}
+  type: {{ .Values.operator.service.type }}
+  {{- if .Values.operator.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.operator.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.operator.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .Values.operator.service.loadBalancerSourceRanges | indent 4 }}
+  {{- end -}}
+{{- else }}
+  type: {{ .Values.operator.service.type }}
+{{- end }}
+{{- if .Values.operator.service.externalIPs }}
+  externalIPs:
+{{ toYaml .Values.operator.service.externalIPs | indent 4 }}
+{{- end }}
+  ports:
+    - name: {{ .Values.operator.service.portName }}
+      port: {{ .Values.operator.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.operator.service.targetPort }}
+      {{- if .Values.operator.service.appProtocol }}
+      appProtocol: {{ .Values.operator.service.appProtocol }}
+      {{- end }}
+      {{- if (and (eq .Values.operator.service.type "NodePort") (not (empty .Values.operator.service.nodePort))) }}
+      nodePort: {{.Values.operator.service.nodePort}}
+      {{ end }}
+      {{- if .Values.operator.extraExposePorts }}
+      {{- tpl (toYaml .Values.operator.extraExposePorts) . | nindent 4 }}
+      {{- end }}
+  selector:
+    {{- include "jina-operator.selectorLabels" . | nindent 4 }}
+{{ end }}

@@ -1,0 +1,45 @@
+{{- if and .Values.operator.rbac.create -}}
+apiVersion: {{ template "jina-operator.rbac.apiVersion" . }}
+kind: Role
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-leader-election-role
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+{{- end }}

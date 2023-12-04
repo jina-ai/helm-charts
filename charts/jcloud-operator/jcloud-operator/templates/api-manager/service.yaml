@@ -1,0 +1,56 @@
+{{ if and .Values.apimanager.enable .Values.apimanager.service.enabled }}
+{{- $fullName := printf "%s-api" (include "jina-operator.fullname" .) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-service
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "api-manager.labels" . | nindent 4 }}
+{{- if .Values.apimanager.service.labels }}
+{{ toYaml .Values.apimanager.service.labels | indent 4 }}
+{{- end }}
+{{- $root := . }}
+{{- with .Values.apimanager.service.annotations }}
+  annotations:
+{{ tpl (toYaml . | indent 4) $root }}
+{{- end }}
+spec:
+{{- if (or (eq .Values.apimanager.service.type "ClusterIP") (empty .Values.apimanager.service.type)) }}
+  type: ClusterIP
+  {{- if .Values.apimanager.service.clusterIP }}
+  clusterIP: {{ .Values.apimanager.service.clusterIP }}
+  {{end}}
+{{- else if eq .Values.apimanager.service.type "LoadBalancer" }}
+  type: {{ .Values.apimanager.service.type }}
+  {{- if .Values.apimanager.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.apimanager.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.apimanager.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .Values.apimanager.service.loadBalancerSourceRanges | indent 4 }}
+  {{- end -}}
+{{- else }}
+  type: {{ .Values.apimanager.service.type }}
+{{- end }}
+{{- if .Values.apimanager.service.externalIPs }}
+  externalIPs:
+{{ toYaml .Values.apimanager.service.externalIPs | indent 4 }}
+{{- end }}
+  ports:
+    - name: {{ .Values.apimanager.service.portName }}
+      port: {{ .Values.apimanager.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.apimanager.service.targetPort }}
+      {{- if .Values.apimanager.service.appProtocol }}
+      appProtocol: {{ .Values.apimanager.service.appProtocol }}
+      {{- end }}
+      {{- if (and (eq .Values.apimanager.service.type "NodePort") (not (empty .Values.apimanager.service.nodePort))) }}
+      nodePort: {{.Values.apimanager.service.nodePort}}
+      {{ end }}
+      {{- if .Values.apimanager.extraExposePorts }}
+      {{- tpl (toYaml .Values.apimanager.extraExposePorts) . | nindent 4 }}
+      {{- end }}
+  selector:
+    {{- include "api-manager.selectorLabels" . | nindent 4 }}
+{{ end }}

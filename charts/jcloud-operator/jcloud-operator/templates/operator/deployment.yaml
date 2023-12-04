@@ -1,0 +1,344 @@
+{{- if .Values.operator.customResources.flow }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "jina-operator.flow-operator-name" . }}
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- if .Values.operator.labels }}
+{{ toYaml .Values.operator.labels | indent 4 }}
+{{- end }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if and (not .Values.operator.autoscaling.enabled) (.Values.operator.replicas) }}
+  replicas: {{ .Values.operator.replicas }}
+{{- end }}
+  revisionHistoryLimit: {{ .Values.operator.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "jina-operator.flowOperatorSelectorLabels" . | nindent 6 }}
+  {{- with .Values.operator.deploymentStrategy }}
+  strategy:
+  {{ toYaml . | trim | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "jina-operator.flowOperatorSelectorLabels" . | nindent 8 }}
+        {{- with .Values.operator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with .Values.operator.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+{{- if .Values.operator.secretSync.enabled }}
+      - name: secret-sync
+        envFrom:
+        - secretRef:
+            name: {{ template "jina-operator.fullname" . }}-secret-sync
+        {{- if .Values.operator.secretSync.image.sha }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}@sha256:{{ .Values.operator.secretSync.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}"
+        {{- end }}
+        {{- if .Values.operator.secretSync.resources }}
+        resources: {{- toYaml .Values.operator.secretSync.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.operator.secretSync.securityContext }}
+        securityContext: {{- toYaml .Values.operator.secretSync.securityContext | nindent 10 }}
+        {{- end }}
+{{- end }}
+{{- if .Values.operator.rbacProxy.enabled }}
+      - name: rbac-proxy
+        args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v={{ .Values.operator.debug.logLevel }}
+        image: {{ .Values.operator.rbacProxy.image }}
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        {{- if .Values.operator.rbacProxy.resources }}
+        resources: {{- toYaml .Values.operator.rbacProxy.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.operator.rbacProxy.securityContext }}
+        securityContext: {{- toYaml .Values.operator.rbacProxy.securityContext | nindent 10 }}
+        {{- end }}
+{{- end }}
+      - name: jcloud-operator
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        {{- if .Values.clusterid }}
+        - name: JCLOUD_CLUSTER_ID
+          value: {{ .Values.clusterid |quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.operator.extraEnv }}
+        - name: {{ $key }}
+          value: {{ $value }}
+        {{- end }}
+        args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        - --zap-log-level=debug
+        {{- if .Values.operator.image.sha }}
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}@sha256:{{ .Values.operator.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+        {{- end }}
+        imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+        {{- with .Values.operator.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- if and .Values.operator.config.create }}
+        - mountPath: /etc/jcloud/configure
+          name: jcloud-operator-config
+          readOnly: true
+        {{- end }}
+        {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
+        - mountPath: /etc/jcloud/credentials
+          name: jcloud-secret
+          readOnly: true
+        {{- end }}
+        {{- if .Values.operator.trustCA }}
+        {{- range $key, $value := .Values.operator.trustCA }}
+        - mountPath: /etc/ssl/certs/{{ $key }}
+          name: trustca
+          readOnly: true
+          subPath: {{ $key }}
+        {{- end }}
+        - mountPath: /usr/local/share/ca-certificates
+          name: trustca
+          readOnly: true
+        {{- end }}
+      serviceAccountName: {{ template "jina-operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      {{- if .Values.operator.image.pullSecrets }}
+      imagePullSecrets:
+      {{- $root := . }}
+      {{- range .Values.operator.image.pullSecrets }}
+        - name: {{ tpl . $root }}
+      {{- end}}
+      {{- end }}
+      volumes:
+      {{- if and .Values.operator.config.create }}
+      - name: jcloud-operator-config
+        configMap:
+          name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- end }}
+      {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
+      - name: jcloud-secret
+        secret:
+          secretName: {{ template "jina-operator.fullname" . }}-secret
+      {{- end }}
+      {{- if .Values.operator.trustCA }}
+      - name: trustca
+        secret:
+          secretName: {{ template "jina-operator.fullname" . }}-trustca
+      {{- end }}
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+
+---
+
+{{- if .Values.operator.customResources.deployment }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "jina-operator.deployment-operator-name" . }}
+  namespace: {{ template "jina-operator.namespace" . }}
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- if .Values.operator.labels }}
+{{ toYaml .Values.operator.labels | indent 4 }}
+{{- end }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if and (not .Values.operator.autoscaling.enabled) (.Values.operator.replicas) }}
+  replicas: {{ .Values.operator.replicas }}
+{{- end }}
+  revisionHistoryLimit: {{ .Values.operator.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "jina-operator.deploymentOperatorSelectorLabels" . | nindent 6 }}
+  {{- with .Values.operator.deploymentStrategy }}
+  strategy:
+  {{ toYaml . | trim | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "jina-operator.deploymentOperatorSelectorLabels" . | nindent 8 }}
+        {{- with .Values.operator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with .Values.operator.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+{{- if .Values.operator.secretSync.enabled }}
+      - name: secret-sync
+        envFrom:
+        - secretRef:
+            name: {{ template "jina-operator.fullname" . }}-secret-sync
+        {{- if .Values.operator.secretSync.image.sha }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}@sha256:{{ .Values.operator.secretSync.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.secretSync.image.repository }}:{{ .Values.operator.secretSync.image.tag }}"
+        {{- end }}
+        {{- if .Values.operator.secretSync.resources }}
+        resources: {{- toYaml .Values.operator.secretSync.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.operator.secretSync.securityContext }}
+        securityContext: {{- toYaml .Values.operator.secretSync.securityContext | nindent 10 }}
+        {{- end }}
+{{- end }}
+{{- if .Values.operator.rbacProxy.enabled }}
+      - name: rbac-proxy
+        args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v={{ .Values.operator.debug.logLevel }}
+        image: {{ .Values.operator.rbacProxy.image }}
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        {{- if .Values.operator.rbacProxy.resources }}
+        resources: {{- toYaml .Values.operator.rbacProxy.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.operator.rbacProxy.securityContext }}
+        securityContext: {{- toYaml .Values.operator.rbacProxy.securityContext | nindent 10 }}
+        {{- end }}
+{{- end }}
+      - name: jcloud-operator
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        {{- if .Values.clusterid }}
+        - name: JCLOUD_CLUSTER_ID
+          value: {{ .Values.clusterid |quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.operator.extraEnv }}
+        - name: {{ $key }}
+          value: {{ $value }}
+        {{- end }}
+        args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        - --zap-log-level=debug
+        - --resource=deployment
+        {{- if .Values.operator.image.sha }}
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}@sha256:{{ .Values.operator.image.sha }}"
+        {{- else }}
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+        {{- end }}
+        imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+        {{- with .Values.operator.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.operator.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- if and .Values.operator.config.create }}
+        - mountPath: /etc/jcloud/configure
+          name: jcloud-operator-config
+          readOnly: true
+        {{- end }}
+        {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
+        - mountPath: /etc/jcloud/credentials
+          name: jcloud-secret
+          readOnly: true
+        {{- end }}
+        {{- if .Values.operator.trustCA }}
+        {{- range $key, $value := .Values.operator.trustCA }}
+        - mountPath: /etc/ssl/certs/{{ $key }}
+          name: trustca
+          readOnly: true
+          subPath: {{ $key }}
+        {{- end }}
+        - mountPath: /usr/local/share/ca-certificates
+          name: trustca
+          readOnly: true
+        {{- end }}
+      serviceAccountName: {{ template "jina-operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      {{- if .Values.operator.image.pullSecrets }}
+      imagePullSecrets:
+      {{- $root := . }}
+      {{- range .Values.operator.image.pullSecrets }}
+        - name: {{ tpl . $root }}
+      {{- end}}
+      {{- end }}
+      volumes:
+      {{- if and .Values.operator.config.create }}
+      - name: jcloud-operator-config
+        configMap:
+          name: {{ template "jina-operator.fullname" . }}-operator-config
+      {{- end }}
+      {{- if and .Values.operator.config.create .Values.operator.config.mongo }}
+      - name: jcloud-secret
+        secret:
+          secretName: {{ template "jina-operator.fullname" . }}-secret
+      {{- end }}
+      {{- if .Values.operator.trustCA }}
+      - name: trustca
+        secret:
+          secretName: {{ template "jina-operator.fullname" . }}-trustca
+      {{- end }}
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

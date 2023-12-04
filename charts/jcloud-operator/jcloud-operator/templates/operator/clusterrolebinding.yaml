@@ -1,0 +1,58 @@
+{{- if and .Values.operator.rbac.create }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-manager-clusterrolebinding
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "jina-operator.serviceAccountName" . }}
+    namespace: {{ template "jina-operator.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "jina-operator.fullname" . }}-manager
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-proxy-clusterrolebinding
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "jina-operator.serviceAccountName" . }}
+    namespace: {{ template "jina-operator.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "jina-operator.fullname" . }}-proxy
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "jina-operator.fullname" . }}-metrics-reader-clusterrolebinding
+  labels:
+    {{- include "jina-operator.labels" . | nindent 4 }}
+{{- with .Values.operator.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "jina-operator.serviceAccountName" . }}
+    namespace: {{ template "jina-operator.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "jina-operator.fullname" . }}-metrics-reader
+  apiGroup: rbac.authorization.k8s.io
+{{- end -}}

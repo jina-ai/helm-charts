@@ -122,6 +122,11 @@ spec:
                     default: ""
                     description: Docarray version to be used for deployment
                     type: string
+                  expose:
+                    default: true
+                    description: 'Denotes if the Deployment needs to be exposed (default:
+                      true)'
+                    type: boolean
                   imagepullpolicy:
                     default: ifnotpresent
                     description: Define image pull policy

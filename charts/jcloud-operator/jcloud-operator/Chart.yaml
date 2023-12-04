@@ -1,0 +1,17 @@
+apiVersion: v2
+name: jcloud-operator
+version: 0.0.6
+appVersion: 0.0.5
+kubeVersion: ">=1.21.0-0"
+description: The operator for jcloud flow management.
+home: https://docs.jina.ai
+sources:
+  - https://github.com/jina-ai/jcloud-operator
+maintainers:
+  - name: deepankarm
+    email: deepankar.mahapatro@jina.ai
+  - name: zac-li
+    email: zac.li@jina.ai
+  - name: tarrantro
+    email: ran.tao@jina.ai
+type: application
